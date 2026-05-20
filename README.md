@@ -138,9 +138,7 @@ Click the **Fork** button at the top-right of this page (or use this link):
 
 <a href="https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot/fork"><img src="https://img.shields.io/badge/Fork%20this%20repo-181717?style=for-the-badge&logo=github&logoColor=white" alt="Fork" /></a>
 
-> 💡 **Why fork first?** A fork gives you your own copy that the deploy buttons can pull from, plus you'll be able to commit changes (custom commands, branding tweaks, environment defaults) without losing them on the next `git pull`.
-
-After forking, your copy lives at `https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot`. Use that URL everywhere below.
+> 💡 **Why fork first?** A fork lets you commit your own changes (custom commands, branding tweaks, environment defaults) without losing them when the upstream updates. Required only if you plan to modify the code — for a plain deploy, you can skip straight to Step 2.
 
 ---
 
@@ -180,7 +178,7 @@ A *Panel* is a web dashboard (Pterodactyl-based) that gives you a Node.js server
 3. Wait ~30 sec for the container to provision. Open it.
 4. Click the **Console** tab and paste:
    ```bash
-   git clone https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot.git .
+   git clone https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot.git .
    npm install
    ```
    *(The trailing `.` clones into the current directory.)*
@@ -299,7 +297,7 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs git ffmpeg
 
 # 3. Clone your fork
-git clone https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot.git
+git clone https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot.git
 cd Titan-MD-WhatsApp-Bot
 
 # 4. Install dependencies
@@ -335,7 +333,7 @@ docker run -d --name titan-md --restart unless-stopped \
   -v $(pwd)/session:/app/session \
   -v $(pwd)/database.db:/app/database.db \
   -e NODE_ENV=production \
-  node:20-slim sh -c "git clone https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot /app && cd /app && npm install && npm run docker"
+  node:20-slim sh -c "git clone https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot /app && cd /app && npm install && npm run docker"
 ```
 
 Or use the dedicated `web/Dockerfile` pattern in [`web/README.md`](./web/README.md).
