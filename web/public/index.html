@@ -387,13 +387,22 @@
   }
   .nav-back:hover { color: var(--accent); }
 
-  /* Custom Session ID toggle */
+  /* Toggle layout: 2-col grid on desktop, single col on mobile */
+  .opt-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 520px) {
+    .opt-grid { grid-template-columns: 1fr; }
+  }
   .opt-toggle {
     background: var(--bg-2);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 14px 16px;
-    margin-bottom: 16px;
+    margin-bottom: 0;
   }
   .opt-row {
     display: flex;
@@ -500,42 +509,33 @@
       <h2>How do you want to pair?</h2>
       <p class="sub">Both methods produce the same <code>SESSION_ID</code>. Pick whichever is easier.</p>
 
-      <!-- Optional toggles -->
-      <div class="opt-toggle">
-        <label class="opt-row">
-          <input type="checkbox" id="opt-custom-id" />
-          <span class="checkmark"></span>
-          <span class="opt-label">
-            <strong>Use Custom Session ID</strong>
-            <small>Choose your own ID (e.g. <code>mybot</code>) instead of a random one.</small>
-          </span>
-        </label>
-        <div id="opt-custom-id-input" style="display:none;margin-top:10px;">
-          <input id="custom-id" type="text" placeholder="mybot" pattern="[a-zA-Z0-9_-]{3,32}" autocomplete="off" />
-          <p class="hint">3–32 characters · letters, numbers, <code>_</code>, <code>-</code> only. Must not be already taken.</p>
+      <!-- Optional toggles — 2-col grid on desktop, stacked on mobile -->
+      <div class="opt-grid">
+        <div class="opt-toggle">
+          <label class="opt-row">
+            <input type="checkbox" id="opt-custom-id" />
+            <span class="checkmark"></span>
+            <span class="opt-label">
+              <strong>Use Custom Session ID</strong>
+              <small>Choose your own ID (e.g. <code>mybot</code>) instead of a random one.</small>
+            </span>
+          </label>
+          <div id="opt-custom-id-input" style="display:none;margin-top:10px;">
+            <input id="custom-id" type="text" placeholder="mybot" pattern="[a-zA-Z0-9_-]{3,32}" autocomplete="off" />
+            <p class="hint">3–32 characters · letters, numbers, <code>_</code>, <code>-</code> only. Must not be already taken.</p>
+          </div>
         </div>
-      </div>
 
-      <div class="opt-toggle">
-        <label class="opt-row">
-          <input type="checkbox" id="opt-send-wa" checked />
-          <span class="checkmark"></span>
-          <span class="opt-label">
-            <strong>Receive Session on WhatsApp</strong>
-            <small>Send a backup copy of your <code>SESSION_ID</code> to your own WhatsApp number after pairing.</small>
-          </span>
-        </label>
-      </div>
-
-      <div class="opt-toggle">
-        <label class="opt-row">
-          <input type="checkbox" id="opt-short-id" />
-          <span class="checkmark"></span>
-          <span class="opt-label">
-            <strong>Use Short URL (experimental)</strong>
-            <small>Get a short <code>TITAN~xxxxxxxx</code> ID instead of a long base64 string. ⚠️ Requires this site to stay online — on free hosts the storage can be wiped on restart. The long format always works.</small>
-          </span>
-        </label>
+        <div class="opt-toggle">
+          <label class="opt-row">
+            <input type="checkbox" id="opt-send-wa" checked />
+            <span class="checkmark"></span>
+            <span class="opt-label">
+              <strong>Receive Session on WhatsApp</strong>
+              <small>Send a backup copy of your <code>SESSION_ID</code> to your own WhatsApp number.</small>
+            </span>
+          </label>
+        </div>
       </div>
 
       <button class="choice" data-method="pair">
@@ -746,7 +746,6 @@ async function startSession(method, phone) {
     const customId = getCustomId();
     if (customId) body.customId = customId;
     body.sendToWa = document.getElementById('opt-send-wa').checked;
-    body.useShortId = document.getElementById('opt-short-id').checked;
     const r = await fetch('/api/session/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

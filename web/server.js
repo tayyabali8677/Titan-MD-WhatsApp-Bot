@@ -181,31 +181,30 @@ async function startSocket(session) {
         }
         const json = fs.readFileSync(credsPath, 'utf8');
         let sessionString;
-        if (session.useShortId || session.customId) {
-          // Short-ID path. Storage backend depends on whether GITHUB_TOKEN is set.
-          let shortId;
-          if (USE_GIST && !session.customId) {
-            // Persistent: create a GitHub gist. The gist ID becomes the
-            // SESSION_ID short part. Gists live forever — no Render disk needed.
-            try {
-              shortId = await gistCreate(json);
-              console.log('[titan-md-web] session stored as gist', shortId);
-            } catch (e) {
-              console.error('[titan-md-web] gist storage failed, falling back to disk:', e.message);
-              shortId = crypto.randomBytes(8).toString('hex');
-              try { fs.writeFileSync(path.join(STORE_ROOT, shortId + '.json'), json, 'utf8'); } catch (_) {}
-            }
-          } else {
-            // Custom IDs (must be human-readable) or disk-only mode.
-            shortId = session.customId || crypto.randomBytes(8).toString('hex');
-            try { fs.writeFileSync(path.join(STORE_ROOT, shortId + '.json'), json, 'utf8'); }
-            catch (e) { console.warn('failed to persist creds:', e.message); }
+
+        if (session.customId) {
+          // Custom human-named ID → disk (only place that supports arbitrary
+          // names; Gist IDs are server-assigned 32-char hashes).
+          try { fs.writeFileSync(path.join(STORE_ROOT, session.customId + '.json'), json, 'utf8'); }
+          catch (e) { console.warn('failed to persist creds:', e.message); }
+          sessionString = 'TITAN~' + session.customId;
+        } else if (USE_GIST) {
+          // GITHUB_TOKEN is set → short Gist ID by default. Persistent forever,
+          // no disk needed, survives Render restarts.
+          try {
+            const gistId = await gistCreate(json);
+            console.log('[titan-md-web] session stored as gist', gistId);
+            sessionString = 'TITAN~' + gistId;
+          } catch (e) {
+            console.error('[titan-md-web] gist storage failed, falling back to inline base64:', e.message);
+            sessionString = 'TITAN~' + Buffer.from(json).toString('base64');
           }
-          sessionString = 'TITAN~' + shortId;
         } else {
-          // Default: inline base64. Long but completely portable.
+          // No persistent storage configured → use long inline base64.
+          // Long but completely portable; works even if this site is offline.
           sessionString = 'TITAN~' + Buffer.from(json).toString('base64');
         }
+
         setStatus(session, 'success', { sessionString });
 
         // Best-effort: DM the SESSION_ID to the user's own WA as a backup —
@@ -301,7 +300,7 @@ const CUSTOM_ID_RE = /^[a-zA-Z0-9_-]{3,32}$/;
 const FETCH_ID_RE  = /^[a-zA-Z0-9_-]{3,32}$/; // matches both custom + random
 
 app.post('/api/session/start', async (req, res) => {
-  const { method, phone, customId, sendToWa, useShortId } = req.body || {};
+  const { method, phone, customId, sendToWa } = req.body || {};
   if (method !== 'qr' && method !== 'pair') {
     return res.status(400).json({ error: 'method must be "qr" or "pair"' });
   }
@@ -335,10 +334,6 @@ app.post('/api/session/start', async (req, res) => {
     phone: phone ? String(phone).replace(/\D/g, '') : null,
     customId: storeId, // null = use random hex id, otherwise the user's chosen name
     sendToWa: sendToWa !== false, // default true
-    // Reliability: default is the inline (long, ~1500-char) base64 format.
-    // Short IDs are opt-in because they break when the session site's disk
-    // is wiped (which Render free tier does on every container restart).
-    useShortId: useShortId === true,
     sock: null,
     tmpDir,
     sseClients: [],
