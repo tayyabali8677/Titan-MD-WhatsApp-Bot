@@ -132,12 +132,19 @@ async function startSocket(session) {
           return;
         }
         const json = fs.readFileSync(credsPath, 'utf8');
-        // Save full creds keyed by either the user-chosen custom ID or a
-        // random 16-hex ID. SESSION_ID handed back is "TITAN~<id>".
-        const shortId = session.customId || crypto.randomBytes(8).toString('hex');
-        try { fs.writeFileSync(path.join(STORE_ROOT, shortId + '.json'), json, 'utf8'); }
-        catch (e) { console.warn('failed to persist creds:', e.message); }
-        const sessionString = 'TITAN~' + shortId;
+        let sessionString;
+        if (session.useShortId || session.customId) {
+          // Opt-in: short ID stored on the session-site disk.
+          // (Custom IDs always use this path since they're an explicit short-name choice.)
+          const shortId = session.customId || crypto.randomBytes(8).toString('hex');
+          try { fs.writeFileSync(path.join(STORE_ROOT, shortId + '.json'), json, 'utf8'); }
+          catch (e) { console.warn('failed to persist creds:', e.message); }
+          sessionString = 'TITAN~' + shortId;
+        } else {
+          // Default: inline base64. Long but completely portable — works
+          // even if this session site is offline or has restarted.
+          sessionString = 'TITAN~' + Buffer.from(json).toString('base64');
+        }
         setStatus(session, 'success', { sessionString });
 
         // Best-effort: DM the SESSION_ID to the user's own WA as a backup —
@@ -233,7 +240,7 @@ const CUSTOM_ID_RE = /^[a-zA-Z0-9_-]{3,32}$/;
 const FETCH_ID_RE  = /^[a-zA-Z0-9_-]{3,32}$/; // matches both custom + random
 
 app.post('/api/session/start', async (req, res) => {
-  const { method, phone, customId, sendToWa } = req.body || {};
+  const { method, phone, customId, sendToWa, useShortId } = req.body || {};
   if (method !== 'qr' && method !== 'pair') {
     return res.status(400).json({ error: 'method must be "qr" or "pair"' });
   }
@@ -266,7 +273,11 @@ app.post('/api/session/start', async (req, res) => {
     method,
     phone: phone ? String(phone).replace(/\D/g, '') : null,
     customId: storeId, // null = use random hex id, otherwise the user's chosen name
-    sendToWa: sendToWa !== false, // default true (backward-compat: clients that omit it get the backup DM)
+    sendToWa: sendToWa !== false, // default true
+    // Reliability: default is the inline (long, ~1500-char) base64 format.
+    // Short IDs are opt-in because they break when the session site's disk
+    // is wiped (which Render free tier does on every container restart).
+    useShortId: useShortId === true,
     sock: null,
     tmpDir,
     sseClients: [],

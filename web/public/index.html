@@ -226,8 +226,8 @@
     font-size: 32px;
     animation: pop 0.4s ease-out;
   }
-  /* Short SESSION_ID — one-line, monospace, easy to copy in full */
-  input#session-output {
+  /* SESSION_ID display — same styles whether short (input) or long (textarea) */
+  #session-output {
     width: 100%;
     padding: 14px 16px;
     background: var(--bg-0);
@@ -235,10 +235,23 @@
     border-radius: 12px;
     color: var(--success);
     font-family: 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 14px;
-    letter-spacing: 0.04em;
-    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-align: left;
     user-select: all;
+    line-height: 1.5;
+    word-break: break-all;
+    resize: vertical;
+    min-height: 60px;
+    max-height: 240px;
+    box-sizing: border-box;
+  }
+  #session-output.is-short {
+    font-size: 14px;
+    text-align: center;
+    letter-spacing: 0.04em;
+    min-height: 0;
+    height: 50px;
   }
   .copy-row { display: flex; gap: 8px; margin-top: 12px; }
   .copy-row button { flex: 1; padding: 12px; }
@@ -514,6 +527,17 @@
         </label>
       </div>
 
+      <div class="opt-toggle">
+        <label class="opt-row">
+          <input type="checkbox" id="opt-short-id" />
+          <span class="checkmark"></span>
+          <span class="opt-label">
+            <strong>Use Short URL (experimental)</strong>
+            <small>Get a short <code>TITAN~xxxxxxxx</code> ID instead of a long base64 string. ⚠️ Requires this site to stay online — on free hosts the storage can be wiped on restart. The long format always works.</small>
+          </span>
+        </label>
+      </div>
+
       <button class="choice" data-method="pair">
         <span class="icon">🔢</span>
         <span class="body">
@@ -593,8 +617,9 @@
       <h2 style="text-align: center;">Session created!</h2>
       <p class="sub" style="text-align: center;">Copy the <code>SESSION_ID</code> below and paste it into your deploy target's env var.</p>
       <label for="session-output">Your SESSION_ID</label>
-      <input id="session-output" type="text" readonly />
-      <p class="hint" style="margin-top:8px;text-align:center;">Short ID — the bot will fetch the full credentials from this server when it boots.</p>
+      <textarea id="session-output" readonly></textarea>
+      <p class="hint" id="hint-long" style="margin-top:8px;text-align:center;">Self-contained base64 — paste anywhere, works without this site.</p>
+      <p class="hint" id="hint-short" style="display:none;margin-top:8px;text-align:center;">Short ID — the bot will fetch credentials from this site at boot.</p>
       <div class="copy-row">
         <button class="primary" id="btn-copy">📋 Copy to clipboard</button>
       </div>
@@ -721,6 +746,7 @@ async function startSession(method, phone) {
     const customId = getCustomId();
     if (customId) body.customId = customId;
     body.sendToWa = document.getElementById('opt-send-wa').checked;
+    body.useShortId = document.getElementById('opt-short-id').checked;
     const r = await fetch('/api/session/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -793,7 +819,13 @@ function listen(sessionId, method) {
     if (data.status === 'success' && data.sessionString) {
       es.close();
       currentEventSource = null;
-      document.getElementById('session-output').value = data.sessionString;
+      const out = document.getElementById('session-output');
+      out.value = data.sessionString;
+      // If the ID is short (< 50 chars), use the compact one-line style.
+      const isShort = data.sessionString.length < 50;
+      out.classList.toggle('is-short', isShort);
+      document.getElementById('hint-long').style.display = isShort ? 'none' : 'block';
+      document.getElementById('hint-short').style.display = isShort ? 'block' : 'none';
       // Show/hide the "sent to WhatsApp" hint based on what the user picked
       const waSent = document.getElementById('success-wa-sent');
       const waSkipped = document.getElementById('success-wa-skipped');
