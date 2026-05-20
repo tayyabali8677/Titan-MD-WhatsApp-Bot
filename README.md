@@ -165,6 +165,50 @@ Pick **Pairing Code** *(type an 8-char code into WhatsApp)* or **QR Code** *(sca
 Pick **one** platform below. All deploy buttons reference this repo; replace `tayyabali8677` with your username in the URL if you want them to deploy from your fork instead.
 
 <details open>
+<summary><b>🎛️ Panel</b> (Bot-Hosting.net) — <b>recommended free option</b></summary>
+
+<br>
+
+<a href="https://bot-hosting.net/?aff=741025541716574350"><img src="https://img.shields.io/badge/Sign%20up%20on-Bot--Hosting.net-7c5cff?style=for-the-badge&logo=node.js&logoColor=white" alt="Sign up on Bot-Hosting.net" /></a>
+
+A *Panel* is a web dashboard (Pterodactyl-based) that gives you a Node.js server container with a console, file manager, and env-var editor. **No credit card, no sleep timer, free Node.js plan with no expiry** — the best free option for an MD bot.
+
+**Step-by-step on [Bot-Hosting.net](https://bot-hosting.net/?aff=741025541716574350):**
+
+1. **Sign up** at [bot-hosting.net](https://bot-hosting.net/?aff=741025541716574350) (Discord OAuth, takes ~10 seconds).
+2. Click **Create Server** → pick the **Node.js** egg → name it (e.g. `titan-md`) → **Create**.
+3. Wait ~30 sec for the container to provision. Open it.
+4. Click the **Console** tab and paste:
+   ```bash
+   git clone https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot.git .
+   npm install
+   ```
+   *(The trailing `.` clones into the current directory.)*
+5. Click the **Startup** tab → set:
+   - **Startup Command:** `node index.js`
+   - **Main File:** `index.js`
+6. Click the **Variables** tab → add:
+   - `SESSION_ID` = `TITAN~...` (from Step 2)
+   - `OWNER_NUMBER` = `923001234567` (your WA number, no `+`)
+   - `SUDO` = `923001234567` (same number)
+   - *(optional)* `GEMINI_API_KEY`, `GROQ_API_KEY`, etc.
+7. Click the green **Start** button at the top of the console. You should see `Titan MD v1.0.0 — plugins: 183` within ~30 seconds.
+8. Proceed to Step 4.
+
+**Other free Panel providers** *(use as backup if Bot-Hosting is down — instructions above work on any Pterodactyl panel)*:
+
+| Provider | URL | Notes |
+|---|---|---|
+| MxGaming | https://mxgaming.xyz/ | Free panel, captcha login |
+| Skyport Panel | https://panel.skyport.dev/ | Free, Discord login |
+| Sparked Host | https://sparkedhost.com/ | Free Node.js egg |
+| Pylex Nodes | https://panel.pylex.xyz/ | Free, daily renewals |
+
+> ⚠️ Free panel providers can shut down at any time. Always keep your `SESSION_ID` saved somewhere safe so you can redeploy elsewhere if needed.
+
+</details>
+
+<details>
 <summary><b>🟪 Heroku</b> — most popular, one-click deploy</summary>
 
 <br>
@@ -183,51 +227,7 @@ Pick **one** platform below. All deploy buttons reference this repo; replace `ta
    - ⚠️ Do NOT enable the `web` dyno — this is a worker, not a web server.
 6. Proceed to Step 4.
 
-> 💡 Heroku no longer offers a free tier. Cheapest worker dyno is ~$5/month. If you want free, scroll to the Panel or Koyeb options below.
-
-</details>
-
-<details>
-<summary><b>🎛️ Panel</b> (Pterodactyl / bot hosting panels) — free Node.js containers</summary>
-
-<br>
-
-A *Panel* is a web dashboard (usually Pterodactyl-based) where you get a Node.js server container with a console, file manager, and environment-variable editor. Many providers offer free Node.js plans specifically for WhatsApp bots.
-
-**Popular free Panel providers** *(no endorsement — pick whichever is up)*:
-
-| Provider | URL | Notes |
-|---|---|---|
-| Bot-Hosting.net | https://bot-hosting.net/ | Free Node.js plan, no expiry |
-| MxGaming | https://mxgaming.xyz/ | Free panel, captcha login |
-| Skyport Panel | https://panel.skyport.dev/ | Free, requires Discord login |
-| Sparked Host | https://sparkedhost.com/ | Free Node.js egg |
-| Pylex Nodes | https://panel.pylex.xyz/ | Free Node.js, daily renewals |
-
-**Generic deploy steps** *(adapt to your chosen provider — Pterodactyl panels all look similar)*:
-
-1. **Sign up** at any of the providers above → verify email.
-2. **Create Server** → pick the **Node.js (Generic)** or **Node.js 20** egg.
-3. **Allocate resources**: 1 vCPU / 512 MB RAM minimum. The bot uses ~150 MB idle.
-4. Open the server's **Console** tab and paste:
-   ```bash
-   git clone https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot.git .
-   npm install
-   ```
-   *(The `.` clones into the current directory, which Pterodactyl pre-creates.)*
-5. Go to **Startup** tab → set:
-   - **Startup Command:** `node index.js`
-   - **Main File:** `index.js`
-6. Go to **Variables** tab (or **Startup** depending on provider) → add:
-   - `SESSION_ID` = `TITAN~...`
-   - `OWNER_NUMBER` = `923001234567`
-   - `SUDO` = `923001234567`
-7. Click **Start** at the top → watch the console; you should see `Titan MD v1.0.0 — plugins: 183` within ~30 seconds.
-8. Proceed to Step 4.
-
-> 💡 **Why panels are great:** truly free, no credit card, no sleep timer (unlike Render free), and you get a console where you can see live logs. Downside: providers come and go, so always have a backup deploy ready.
-
-> ⚠️ Some panel providers shut down at any moment. If yours goes offline, you'll need to re-pair from the session site (the SESSION_ID in your old panel can't be recovered after the container is deleted).
+> 💡 Heroku no longer offers a free tier. Cheapest worker dyno is ~$5/month. If you want free, see the Panel option above.
 
 </details>
 
