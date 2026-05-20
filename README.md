@@ -165,29 +165,7 @@ Pick **Pairing Code** *(type an 8-char code into WhatsApp)* or **QR Code** *(sca
 Pick **one** platform below. All deploy buttons reference this repo; replace `tayyabali8677` with your username in the URL if you want them to deploy from your fork instead.
 
 <details open>
-<summary><b>🟩 Render</b> — free tier, recommended for first-timers</summary>
-
-<br>
-
-<a href="https://render.com/deploy?repo=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot"><img src="https://img.shields.io/badge/Deploy%20to-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" /></a>
-
-1. Click the button above.
-2. Sign in with GitHub → authorize Render → pick your fork.
-3. Service type: **Background Worker**.
-4. Build command: `npm install`
-5. Start command: `npm start`
-6. Add **Environment Variables** (click "Add" for each):
-   - `SESSION_ID` = `TITAN~...` (from Step 2)
-   - `OWNER_NUMBER` = `923001234567` (your WA number, no `+`)
-   - `SUDO` = `923001234567` (same number)
-   - *(optional)* `GEMINI_API_KEY`, `GROQ_API_KEY`, etc.
-7. Click **Create Web Service**. Wait ~3 min for first build.
-8. Once status is "Live", proceed to Step 4.
-
-</details>
-
-<details>
-<summary><b>🟪 Heroku</b> — classic, requires credit card on file</summary>
+<summary><b>🟪 Heroku</b> — most popular, one-click deploy</summary>
 
 <br>
 
@@ -196,13 +174,83 @@ Pick **one** platform below. All deploy buttons reference this repo; replace `ta
 1. Click the button above (or go to your fork → click **Deploy to Heroku**).
 2. Pick an app name (e.g. `your-titan-md`) and region.
 3. Fill the **Config Vars**:
-   - `SESSION_ID` = `TITAN~...`
-   - `OWNER_NUMBER` = `923001234567`
-   - `SUDO` = `923001234567`
+   - `SESSION_ID` = `TITAN~...` (from Step 2)
+   - `OWNER_NUMBER` = `923001234567` (your WA number, no `+`)
+   - `SUDO` = `923001234567` (same number)
+   - *(optional)* `GEMINI_API_KEY`, `GROQ_API_KEY`, etc.
 4. Click **Deploy app** → wait ~3 min.
 5. Go to **Resources** tab → flip the **worker** dyno **ON**.
    - ⚠️ Do NOT enable the `web` dyno — this is a worker, not a web server.
 6. Proceed to Step 4.
+
+> 💡 Heroku no longer offers a free tier. Cheapest worker dyno is ~$5/month. If you want free, scroll to the Panel or Koyeb options below.
+
+</details>
+
+<details>
+<summary><b>🎛️ Panel</b> (Pterodactyl / bot hosting panels) — free Node.js containers</summary>
+
+<br>
+
+A *Panel* is a web dashboard (usually Pterodactyl-based) where you get a Node.js server container with a console, file manager, and environment-variable editor. Many providers offer free Node.js plans specifically for WhatsApp bots.
+
+**Popular free Panel providers** *(no endorsement — pick whichever is up)*:
+
+| Provider | URL | Notes |
+|---|---|---|
+| Bot-Hosting.net | https://bot-hosting.net/ | Free Node.js plan, no expiry |
+| MxGaming | https://mxgaming.xyz/ | Free panel, captcha login |
+| Skyport Panel | https://panel.skyport.dev/ | Free, requires Discord login |
+| Sparked Host | https://sparkedhost.com/ | Free Node.js egg |
+| Pylex Nodes | https://panel.pylex.xyz/ | Free Node.js, daily renewals |
+
+**Generic deploy steps** *(adapt to your chosen provider — Pterodactyl panels all look similar)*:
+
+1. **Sign up** at any of the providers above → verify email.
+2. **Create Server** → pick the **Node.js (Generic)** or **Node.js 20** egg.
+3. **Allocate resources**: 1 vCPU / 512 MB RAM minimum. The bot uses ~150 MB idle.
+4. Open the server's **Console** tab and paste:
+   ```bash
+   git clone https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot.git .
+   npm install
+   ```
+   *(The `.` clones into the current directory, which Pterodactyl pre-creates.)*
+5. Go to **Startup** tab → set:
+   - **Startup Command:** `node index.js`
+   - **Main File:** `index.js`
+6. Go to **Variables** tab (or **Startup** depending on provider) → add:
+   - `SESSION_ID` = `TITAN~...`
+   - `OWNER_NUMBER` = `923001234567`
+   - `SUDO` = `923001234567`
+7. Click **Start** at the top → watch the console; you should see `Titan MD v1.0.0 — plugins: 183` within ~30 seconds.
+8. Proceed to Step 4.
+
+> 💡 **Why panels are great:** truly free, no credit card, no sleep timer (unlike Render free), and you get a console where you can see live logs. Downside: providers come and go, so always have a backup deploy ready.
+
+> ⚠️ Some panel providers shut down at any moment. If yours goes offline, you'll need to re-pair from the session site (the SESSION_ID in your old panel can't be recovered after the container is deleted).
+
+</details>
+
+<details>
+<summary><b>🟩 Render</b> — free web tier (no free worker)</summary>
+
+<br>
+
+<a href="https://render.com/deploy?repo=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot"><img src="https://img.shields.io/badge/Deploy%20to-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" /></a>
+
+1. Click the button above.
+2. Sign in with GitHub → authorize Render → pick your fork.
+3. Service type: **Background Worker** *(requires paid plan ~$7/mo)*.
+4. Build command: `npm install`
+5. Start command: `npm start`
+6. Add **Environment Variables**:
+   - `SESSION_ID` = `TITAN~...`
+   - `OWNER_NUMBER` = `923001234567`
+   - `SUDO` = `923001234567`
+7. Click **Create Worker**. Wait ~3 min for first build.
+8. Proceed to Step 4.
+
+> 💡 Render's free tier is **web services only**. The bot needs a Background Worker which is paid. Use Render for the *session generator* (free, works perfectly) and one of the free options above for the bot itself.
 
 </details>
 
