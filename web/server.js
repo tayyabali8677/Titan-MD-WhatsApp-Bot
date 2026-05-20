@@ -31,6 +31,54 @@ const STORE_TTL_MS = 7 * 24 * 3600 * 1000; // 7 days — keep delivered creds fe
 try { fs.mkdirSync(TMP_ROOT, { recursive: true }); } catch (_) {}
 try { fs.mkdirSync(STORE_ROOT, { recursive: true }); } catch (_) {}
 
+// ─── Persistent session storage via GitHub Gists ────────────────────────────
+// When GITHUB_TOKEN is set, the session site stores creds in private gists
+// (Levanter's approach). Gists persist forever, survive Render free-tier
+// restarts, and don't need a paid persistent disk. Without the token,
+// falls back to local disk (ephemeral, current behavior).
+//
+// Setup:
+//   1. https://github.com/settings/tokens/new → scope: `gist` only
+//   2. Copy the ghp_... token
+//   3. Add as GITHUB_TOKEN env var on your Render service
+//   4. Restart the service
+const GITHUB_TOKEN = (process.env.GITHUB_TOKEN || '').trim();
+const USE_GIST = GITHUB_TOKEN.length > 0;
+
+async function gistCreate(credsJson) {
+  const r = await fetch('https://api.github.com/gists', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + GITHUB_TOKEN,
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'titan-md-session',
+    },
+    body: JSON.stringify({
+      description: 'Titan MD session (auto-generated, secret)',
+      public: false,
+      files: { 'creds.json': { content: credsJson } },
+    }),
+  });
+  if (!r.ok) throw new Error('gist create failed: ' + r.status + ' ' + await r.text().catch(()=> ''));
+  const j = await r.json();
+  return j.id;
+}
+
+async function gistRead(gistId) {
+  const r = await fetch('https://api.github.com/gists/' + gistId, {
+    headers: {
+      Authorization: 'Bearer ' + GITHUB_TOKEN,
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'titan-md-session',
+    },
+  });
+  if (!r.ok) return null;
+  const j = await r.json();
+  return j.files?.['creds.json']?.content || null;
+}
+
+console.log('[titan-md-web] session storage:', USE_GIST ? 'GitHub Gist (persistent)' : 'local disk (ephemeral — set GITHUB_TOKEN for persistence)');
+
 // Periodic GC of expired stored creds
 setInterval(() => {
   const cutoff = Date.now() - STORE_TTL_MS;
@@ -134,15 +182,28 @@ async function startSocket(session) {
         const json = fs.readFileSync(credsPath, 'utf8');
         let sessionString;
         if (session.useShortId || session.customId) {
-          // Opt-in: short ID stored on the session-site disk.
-          // (Custom IDs always use this path since they're an explicit short-name choice.)
-          const shortId = session.customId || crypto.randomBytes(8).toString('hex');
-          try { fs.writeFileSync(path.join(STORE_ROOT, shortId + '.json'), json, 'utf8'); }
-          catch (e) { console.warn('failed to persist creds:', e.message); }
+          // Short-ID path. Storage backend depends on whether GITHUB_TOKEN is set.
+          let shortId;
+          if (USE_GIST && !session.customId) {
+            // Persistent: create a GitHub gist. The gist ID becomes the
+            // SESSION_ID short part. Gists live forever — no Render disk needed.
+            try {
+              shortId = await gistCreate(json);
+              console.log('[titan-md-web] session stored as gist', shortId);
+            } catch (e) {
+              console.error('[titan-md-web] gist storage failed, falling back to disk:', e.message);
+              shortId = crypto.randomBytes(8).toString('hex');
+              try { fs.writeFileSync(path.join(STORE_ROOT, shortId + '.json'), json, 'utf8'); } catch (_) {}
+            }
+          } else {
+            // Custom IDs (must be human-readable) or disk-only mode.
+            shortId = session.customId || crypto.randomBytes(8).toString('hex');
+            try { fs.writeFileSync(path.join(STORE_ROOT, shortId + '.json'), json, 'utf8'); }
+            catch (e) { console.warn('failed to persist creds:', e.message); }
+          }
           sessionString = 'TITAN~' + shortId;
         } else {
-          // Default: inline base64. Long but completely portable — works
-          // even if this session site is offline or has restarted.
+          // Default: inline base64. Long but completely portable.
           sessionString = 'TITAN~' + Buffer.from(json).toString('base64');
         }
         setStatus(session, 'success', { sessionString });
@@ -349,15 +410,30 @@ app.post('/api/session/:id/cancel', (req, res) => {
 });
 
 // Endpoint the bot calls on boot to materialize creds.json from the short ID.
-// Accepts either a random hex ID or a user-chosen custom ID.
-app.get('/api/session/fetch/:id', (req, res) => {
+// Accepts:
+//   - GitHub gist ID (20-40 alnum chars) — fetched from Gist API
+//   - File-backed short ID (3-32 alnum/_-) — read from local disk
+app.get('/api/session/fetch/:id', async (req, res) => {
   const id = String(req.params.id || '');
+  // Gist IDs are 20-40 alphanumeric — try that path first if token configured
+  if (USE_GIST && /^[a-zA-Z0-9]{20,40}$/.test(id)) {
+    try {
+      const creds = await gistRead(id);
+      if (creds) {
+        res.setHeader('Content-Type', 'application/json');
+        return res.send(creds);
+      }
+    } catch (e) {
+      console.warn('[titan-md-web] gist read error:', e.message);
+    }
+    // fall through to file lookup as a safety net
+  }
   if (!FETCH_ID_RE.test(id)) {
     return res.status(400).json({ error: 'invalid id format' });
   }
   const file = path.join(STORE_ROOT, id + '.json');
   if (!fs.existsSync(file)) {
-    return res.status(404).json({ error: 'session not found or expired (>7 days old)' });
+    return res.status(404).json({ error: 'session not found or expired' });
   }
   try { fs.utimesSync(file, new Date(), new Date()); } catch (_) {}
   res.setHeader('Content-Type', 'application/json');
