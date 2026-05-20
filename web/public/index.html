@@ -487,7 +487,7 @@
       <h2>How do you want to pair?</h2>
       <p class="sub">Both methods produce the same <code>SESSION_ID</code>. Pick whichever is easier.</p>
 
-      <!-- Custom Session ID toggle -->
+      <!-- Optional toggles -->
       <div class="opt-toggle">
         <label class="opt-row">
           <input type="checkbox" id="opt-custom-id" />
@@ -501,6 +501,17 @@
           <input id="custom-id" type="text" placeholder="mybot" pattern="[a-zA-Z0-9_-]{3,32}" autocomplete="off" />
           <p class="hint">3–32 characters · letters, numbers, <code>_</code>, <code>-</code> only. Must not be already taken.</p>
         </div>
+      </div>
+
+      <div class="opt-toggle">
+        <label class="opt-row">
+          <input type="checkbox" id="opt-send-wa" checked />
+          <span class="checkmark"></span>
+          <span class="opt-label">
+            <strong>Receive Session on WhatsApp</strong>
+            <small>Send a backup copy of your <code>SESSION_ID</code> to your own WhatsApp number after pairing.</small>
+          </span>
+        </label>
       </div>
 
       <button class="choice" data-method="pair">
@@ -590,7 +601,8 @@
       <div class="warning">
         ⚠️ Treat this like a password. Anyone with it controls your WhatsApp account. Don't share or commit it.
       </div>
-      <p class="hint" style="margin-top:14px;text-align:center;">📩 A copy has also been sent to your own WhatsApp as a backup.</p>
+      <p class="hint" id="success-wa-sent" style="margin-top:14px;text-align:center;">📩 A copy has also been sent to your own WhatsApp as a backup.</p>
+      <p class="hint" id="success-wa-skipped" style="margin-top:14px;text-align:center;color:#ff8a9e;display:none;">⚠️ You will not receive the session ID on WhatsApp — copy it from here now.</p>
       <button class="secondary" data-back>Generate another →</button>
     </section>
 
@@ -708,6 +720,7 @@ async function startSession(method, phone) {
     if (phone) body.phone = phone;
     const customId = getCustomId();
     if (customId) body.customId = customId;
+    body.sendToWa = document.getElementById('opt-send-wa').checked;
     const r = await fetch('/api/session/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -781,6 +794,14 @@ function listen(sessionId, method) {
       es.close();
       currentEventSource = null;
       document.getElementById('session-output').value = data.sessionString;
+      // Show/hide the "sent to WhatsApp" hint based on what the user picked
+      const waSent = document.getElementById('success-wa-sent');
+      const waSkipped = document.getElementById('success-wa-skipped');
+      const sentToWa = document.getElementById('opt-send-wa').checked;
+      if (waSent && waSkipped) {
+        waSent.style.display = sentToWa ? 'block' : 'none';
+        waSkipped.style.display = sentToWa ? 'none' : 'block';
+      }
       show('step-success');
     }
     if (data.status === 'error') {

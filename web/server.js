@@ -140,20 +140,23 @@ async function startSocket(session) {
         const sessionString = 'TITAN~' + shortId;
         setStatus(session, 'success', { sessionString });
 
-        // Best-effort: DM the SESSION_ID to the user's own WA as a backup.
-        try {
-          const ownerJid = sock?.user?.id;
-          if (ownerJid) {
-            await sock.sendMessage(ownerJid, {
-              text:
-                '*⚡ Titan MD — your SESSION_ID*\n\n' +
-                'Paste this string into your deploy env var:\n\n' +
-                '```' + sessionString + '```\n\n' +
-                '⚠️ Treat this like a password — anyone with it controls this WhatsApp account.\n' +
-                'Do not share or commit it to git.',
-            });
-          }
-        } catch (_) { /* DM is best-effort */ }
+        // Best-effort: DM the SESSION_ID to the user's own WA as a backup —
+        // only if the user opted in (default true).
+        if (session.sendToWa) {
+          try {
+            const ownerJid = sock?.user?.id;
+            if (ownerJid) {
+              await sock.sendMessage(ownerJid, {
+                text:
+                  '*⚡ Titan MD — your SESSION_ID*\n\n' +
+                  'Paste this string into your deploy env var:\n\n' +
+                  '```' + sessionString + '```\n\n' +
+                  '⚠️ Treat this like a password — anyone with it controls this WhatsApp account.\n' +
+                  'Do not share or commit it to git.',
+              });
+            }
+          } catch (_) { /* DM is best-effort */ }
+        }
 
         teardown(session, 30 * 1000);
       }, 1000);
@@ -230,7 +233,7 @@ const CUSTOM_ID_RE = /^[a-zA-Z0-9_-]{3,32}$/;
 const FETCH_ID_RE  = /^[a-zA-Z0-9_-]{3,32}$/; // matches both custom + random
 
 app.post('/api/session/start', async (req, res) => {
-  const { method, phone, customId } = req.body || {};
+  const { method, phone, customId, sendToWa } = req.body || {};
   if (method !== 'qr' && method !== 'pair') {
     return res.status(400).json({ error: 'method must be "qr" or "pair"' });
   }
@@ -263,6 +266,7 @@ app.post('/api/session/start', async (req, res) => {
     method,
     phone: phone ? String(phone).replace(/\D/g, '') : null,
     customId: storeId, // null = use random hex id, otherwise the user's chosen name
+    sendToWa: sendToWa !== false, // default true (backward-compat: clients that omit it get the backup DM)
     sock: null,
     tmpDir,
     sseClients: [],
