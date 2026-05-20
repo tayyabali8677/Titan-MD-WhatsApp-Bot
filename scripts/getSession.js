@@ -22,9 +22,9 @@ const SESSION_DIR = path.join(process.cwd(), 'session-tmp');
   try { fs.rmSync(SESSION_DIR, { recursive: true, force: true }); } catch (_) {}
   fs.mkdirSync(SESSION_DIR, { recursive: true });
 
-  let makeWASocket, useMultiFileAuthState, DisconnectReason;
+  let makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, Browsers;
   try {
-    ({ default: makeWASocket, useMultiFileAuthState, DisconnectReason } =
+    ({ default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, Browsers } =
       require('@whiskeysockets/baileys'));
   } catch (e) {
     console.error('Run `npm install` first — @whiskeysockets/baileys is missing.');
@@ -33,10 +33,18 @@ const SESSION_DIR = path.join(process.cwd(), 'session-tmp');
 
   const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
 
+  let waVersion;
+  try { waVersion = (await fetchLatestBaileysVersion()).version; } catch (_) {}
+
   const sock = makeWASocket({
+    version: waVersion,
     auth: state,
     printQRInTerminal: !pairNumber,
-    browser: ['Titan MD', 'Chrome', '1.0.0'],
+    browser: Browsers ? Browsers.ubuntu('Chrome') : ['Titan MD', 'Chrome', '1.0.0'],
+    syncFullHistory: false,
+    markOnlineOnConnect: false,
+    connectTimeoutMs: 60_000,
+    keepAliveIntervalMs: 30_000,
   });
 
   // Pair-code path: request code AFTER socket boots, but BEFORE it's registered

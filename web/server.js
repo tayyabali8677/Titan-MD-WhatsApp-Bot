@@ -68,7 +68,7 @@ app.post('/api/session/start', async (req, res) => {
   let baileys;
   try { baileys = require('@whiskeysockets/baileys'); }
   catch (e) { return res.status(500).json({ error: 'baileys not installed; run npm install' }); }
-  const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = baileys;
+  const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, Browsers } = baileys;
 
   const sessionId = crypto.randomBytes(16).toString('hex');
   const tmpDir = path.join(TMP_ROOT, sessionId);
@@ -76,10 +76,24 @@ app.post('/api/session/start', async (req, res) => {
 
   const { state, saveCreds } = await useMultiFileAuthState(tmpDir);
 
+  // Fetch current WhatsApp Web protocol version — without this, an older
+  // hard-coded version triggers "Connection Failure" the moment WA bumps protocol.
+  let waVersion;
+  try {
+    const v = await fetchLatestBaileysVersion();
+    waVersion = v.version;
+  } catch (_) { /* fall back to baileys default */ }
+
   const sock = makeWASocket({
+    version: waVersion,
     auth: state,
     printQRInTerminal: false,
-    browser: ['Titan MD', 'Chrome', '1.0.0'],
+    browser: Browsers ? Browsers.ubuntu('Chrome') : ['Titan MD', 'Chrome', '1.0.0'],
+    syncFullHistory: false,
+    markOnlineOnConnect: false,
+    generateHighQualityLinkPreview: false,
+    connectTimeoutMs: 60_000,
+    keepAliveIntervalMs: 30_000,
   });
 
   const session = {
@@ -142,8 +156,26 @@ app.post('/api/session/start', async (req, res) => {
       const reason = update.lastDisconnect?.error?.message || `code ${code}`;
       // If we already succeeded, the close is just the cleanup — ignore.
       if (session.status === 'success') return;
+
+      // Some Baileys disconnect codes are transient — the socket reconnects on
+      // its own. Don't bubble those to the user as errors; just keep waiting.
+      const transient = new Set([
+        DisconnectReason?.connectionClosed,
+        DisconnectReason?.connectionLost,
+        DisconnectReason?.restartRequired,
+        DisconnectReason?.timedOut,
+      ].filter(Boolean));
+      if (transient.has(code)) {
+        // Baileys will reconnect automatically — keep the session alive.
+        return;
+      }
+
       if (code === DisconnectReason?.loggedOut) {
-        setStatus(session, 'error', { error: 'Logged out before pairing completed.' });
+        setStatus(session, 'error', { error: 'Logged out before pairing completed. Try again.' });
+      } else if (code === DisconnectReason?.badSession) {
+        setStatus(session, 'error', { error: 'Bad session — please restart pairing.' });
+      } else if (code === DisconnectReason?.connectionReplaced) {
+        setStatus(session, 'error', { error: 'Connection replaced — another session took over.' });
       } else {
         setStatus(session, 'error', { error: 'Connection closed: ' + reason });
       }
