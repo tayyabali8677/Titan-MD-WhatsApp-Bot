@@ -128,85 +128,183 @@
 
 ## 🚀 Quick Start
 
-### Generate your SESSION_ID (60 seconds)
+Follow these **4 steps** in order. Total time: ~5 minutes.
 
-Pick whichever you find easier:
+---
 
-#### 🌐 Option A — Hosted web UI *(easiest)*
+### 🍴 Step 1 — Fork this repository
 
-Deploy your own session site once, then visit it any time you need a fresh `SESSION_ID`:
+Click the **Fork** button at the top-right of this page (or use this link):
 
-[![Deploy session site to Render](https://img.shields.io/badge/Deploy%20Session%20Site-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://render.com/deploy?repo=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot)
+<a href="https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot/fork"><img src="https://img.shields.io/badge/Fork%20this%20repo-181717?style=for-the-badge&logo=github&logoColor=white" alt="Fork" /></a>
 
-Or run locally: `npm install && npm run web` → open http://localhost:3000.
+> 💡 **Why fork first?** A fork gives you your own copy that the deploy buttons can pull from, plus you'll be able to commit changes (custom commands, branding tweaks, environment defaults) without losing them on the next `git pull`.
 
-The UI walks you through QR scan or pair-code, then displays a one-tap-copy `TITAN~...` string. See [`web/README.md`](./web/README.md).
+After forking, your copy lives at `https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot`. Use that URL everywhere below.
 
-#### 💻 Option B — Terminal
+---
+
+### 🔑 Step 2 — Generate your SESSION_ID
+
+Pick the method that fits your setup:
+
+<table>
+<tr><td width="50%">
+
+#### 🌐 Hosted web UI *(easiest)*
+
+Deploy your own session generator once and reuse it whenever you need a fresh `SESSION_ID`:
+
+<a href="https://render.com/deploy?repo=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot"><img src="https://img.shields.io/badge/Deploy%20Session%20Site-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" /></a>
+
+1. Click **Deploy to Render** above → sign in → accept defaults.
+2. Wait ~2 min for the build to finish.
+3. Open the live URL → pick **Pairing Code** or **QR Code**.
+4. Once your phone is linked, the `TITAN~...` string appears on screen *and* is also sent to your WhatsApp as a backup.
+
+</td><td>
+
+#### 💻 Terminal *(developer-friendly)*
 
 ```bash
-git clone https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot.git
+git clone https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot.git
 cd Titan-MD-WhatsApp-Bot
 npm install
 
 # Pairing code (headless / VPS friendly)
-npm run session:pair 923001234567   # ← your WA number, no +
+npm run session:pair 923001234567
 
 # Or QR code (terminal must be visible)
 npm run session
 ```
 
-Both methods print a `TITAN~...` string. That's your `SESSION_ID`. **Treat it like a password.**
-
-### Deploy
-
-<table>
-<tr><td>
-
-#### 🟪 Heroku
-<a href="https://heroku.com/deploy?template=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot"><img src="https://img.shields.io/badge/Deploy%20to-Heroku-79589F?style=for-the-badge&logo=heroku&logoColor=white" /></a>
-
-Set `SESSION_ID`, `OWNER_NUMBER`, `SUDO` as Config Vars. Enable the **worker** dyno.
-
-</td><td>
-
-#### 🟩 Render
-<a href="https://render.com/deploy?repo=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot"><img src="https://img.shields.io/badge/Deploy%20to-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" /></a>
-
-New Background Worker · Build: `npm install` · Start: `npm start`
-
-</td></tr>
-<tr><td>
-
-#### 🐋 Koyeb
-<a href="https://app.koyeb.com/deploy?type=git&repository=github.com/tayyabali8677/Titan-MD-WhatsApp-Bot&branch=master"><img src="https://img.shields.io/badge/Deploy%20to-Koyeb-121212?style=for-the-badge&logo=koyeb&logoColor=white" /></a>
-
-Worker type · `npm install && npm run docker`
-
-</td><td>
-
-#### 🚂 Railway
-<a href="https://railway.app/new/template?template=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot"><img src="https://img.shields.io/badge/Deploy%20to-Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white" /></a>
-
-Auto-detects `package.json` and `Procfile`.
+Both methods print a `TITAN~...` string to the terminal.
 
 </td></tr>
 </table>
 
-### VPS / Local
+> ⚠️ **Treat `SESSION_ID` like a password.** Anyone with it controls your WhatsApp account. Never commit it to git, never paste it in chats, never share screenshots of the full string.
+
+---
+
+### 🚀 Step 3 — Deploy to a hosting platform
+
+Pick **one** platform below. All deploy buttons reference this repo; replace `tayyabali8677` with your username in the URL if you want them to deploy from your fork instead.
+
+<details open>
+<summary><b>🟩 Render</b> — free tier, recommended for first-timers</summary>
+
+<br>
+
+<a href="https://render.com/deploy?repo=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot"><img src="https://img.shields.io/badge/Deploy%20to-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" /></a>
+
+1. Click the button above.
+2. Sign in with GitHub → authorize Render → pick your fork.
+3. Service type: **Background Worker**.
+4. Build command: `npm install`
+5. Start command: `npm start`
+6. Add **Environment Variables** (click "Add" for each):
+   - `SESSION_ID` = `TITAN~...` (from Step 2)
+   - `OWNER_NUMBER` = `923001234567` (your WA number, no `+`)
+   - `SUDO` = `923001234567` (same number)
+   - *(optional)* `GEMINI_API_KEY`, `GROQ_API_KEY`, etc.
+7. Click **Create Web Service**. Wait ~3 min for first build.
+8. Once status is "Live", proceed to Step 4.
+
+</details>
+
+<details>
+<summary><b>🟪 Heroku</b> — classic, requires credit card on file</summary>
+
+<br>
+
+<a href="https://heroku.com/deploy?template=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot"><img src="https://img.shields.io/badge/Deploy%20to-Heroku-79589F?style=for-the-badge&logo=heroku&logoColor=white" /></a>
+
+1. Click the button above (or go to your fork → click **Deploy to Heroku**).
+2. Pick an app name (e.g. `your-titan-md`) and region.
+3. Fill the **Config Vars**:
+   - `SESSION_ID` = `TITAN~...`
+   - `OWNER_NUMBER` = `923001234567`
+   - `SUDO` = `923001234567`
+4. Click **Deploy app** → wait ~3 min.
+5. Go to **Resources** tab → flip the **worker** dyno **ON**.
+   - ⚠️ Do NOT enable the `web` dyno — this is a worker, not a web server.
+6. Proceed to Step 4.
+
+</details>
+
+<details>
+<summary><b>🐋 Koyeb</b> — generous free tier, no credit card</summary>
+
+<br>
+
+<a href="https://app.koyeb.com/deploy?type=git&repository=github.com/tayyabali8677/Titan-MD-WhatsApp-Bot&branch=master"><img src="https://img.shields.io/badge/Deploy%20to-Koyeb-121212?style=for-the-badge&logo=koyeb&logoColor=white" /></a>
+
+1. Sign in with GitHub on Koyeb.
+2. **Create Service** → **GitHub** → pick your fork.
+3. Build command: `npm install`
+4. Run command: `npm run docker`
+5. Service type: **Worker**.
+6. Environment variables: `SESSION_ID`, `OWNER_NUMBER`, `SUDO` (same as Render above).
+7. Click **Deploy**.
+
+</details>
+
+<details>
+<summary><b>🚂 Railway</b> — fastest deploys, $5 monthly free credit</summary>
+
+<br>
+
+<a href="https://railway.app/new/template?template=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot"><img src="https://img.shields.io/badge/Deploy%20to-Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white" /></a>
+
+1. Sign in with GitHub → **New Project** → **Deploy from GitHub repo** → pick your fork.
+2. Railway auto-detects `package.json` + `Procfile`.
+3. **Variables** tab → add `SESSION_ID`, `OWNER_NUMBER`, `SUDO`.
+4. Click **Deploy**.
+
+</details>
+
+<details>
+<summary><b>🖥️ VPS</b> (Ubuntu / Debian — full control)</summary>
+
+<br>
 
 ```bash
-ssh your-vps
-git clone https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot.git
+# 1. SSH into your VPS
+ssh root@your-vps-ip
+
+# 2. Install Node.js 20 if not present
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs git ffmpeg
+
+# 3. Clone your fork
+git clone https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot.git
 cd Titan-MD-WhatsApp-Bot
+
+# 4. Install dependencies
 npm install
+
+# 5. Create config.env from template and edit
 cp config.env.example config.env
-nano config.env                  # paste SESSION_ID, OWNER_NUMBER, SUDO
-npm start                        # PM2-managed, auto-restart
-pm2 save && pm2 startup          # survive reboot
+nano config.env
+# → paste SESSION_ID, OWNER_NUMBER, SUDO and save (Ctrl+O, Enter, Ctrl+X)
+
+# 6. Start the bot (PM2-managed, auto-restart on crash)
+npm start
+
+# 7. Persist across reboots
+pm2 save
+pm2 startup    # follow the printed sudo command
 ```
 
-### Docker
+To update later: `git pull && npm install && pm2 restart titan-md`
+
+</details>
+
+<details>
+<summary><b>🐳 Docker</b> — runs anywhere</summary>
+
+<br>
 
 ```bash
 docker run -d --name titan-md --restart unless-stopped \
@@ -215,8 +313,96 @@ docker run -d --name titan-md --restart unless-stopped \
   -e SUDO="923001234567" \
   -v $(pwd)/session:/app/session \
   -v $(pwd)/database.db:/app/database.db \
-  ghcr.io/tayyabali8677/titan-md:latest
+  -e NODE_ENV=production \
+  node:20-slim sh -c "git clone https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot /app && cd /app && npm install && npm run docker"
 ```
+
+Or use the dedicated `web/Dockerfile` pattern in [`web/README.md`](./web/README.md).
+
+</details>
+
+---
+
+### ✅ Step 4 — Verify your bot is alive
+
+Within ~30 seconds of the deploy finishing, your bot should be online on WhatsApp.
+
+From any chat where the bot is a participant (or your own chat with yourself), send:
+
+```
+.alive
+```
+
+You should get an instant reply like:
+```
+*Titan MD is alive!* 🚀
+Uptime: 0d 0h 0m 30s
+By TitanDev — titanmd.site
+```
+
+Then try a few more:
+
+```
+.help          ← full command list
+.menu          ← bordered category view
+.ping          ← latency check
+.weather Karachi   ← any utility command
+```
+
+If `.alive` doesn't respond after 60 seconds:
+
+1. Check your deploy logs — look for `Titan MD connected` or any errors.
+2. Verify `SESSION_ID` was pasted **completely** (it's usually 800–1500 chars).
+3. Make sure you only have **one** instance running (multiple instances on the same session invalidate each other).
+4. If you forked: check that the deploy is pulling from your fork, not the source repo.
+
+### 🛠️ Troubleshooting
+
+<details>
+<summary>Bot shows online but doesn't reply to any command</summary>
+
+The `SESSION_ID` was truncated when you pasted it. Re-generate via Step 2 and paste the **full** string (it should start with `TITAN~` and be ~800–1500 chars long).
+</details>
+
+<details>
+<summary>"Logged out" / "Connection closed" errors after deploy</summary>
+
+Two common causes:
+1. **Multiple deploys using the same SESSION_ID** — WhatsApp invalidates the session when it sees the same key from two places. Run only one instance.
+2. **You scanned/paired the bot to another device** — anything that re-pairs your WA disconnects the bot. Re-run Step 2 to get a fresh SESSION_ID.
+
+</details>
+
+<details>
+<summary>Commands work but say "Sudo only"</summary>
+
+Set the `SUDO` env var to your phone number (no `+`, no spaces). Comma-separate if you want multiple sudo users: `SUDO=923001234567,919812345678`.
+</details>
+
+<details>
+<summary>Heroku H10 dyno crash immediately on boot</summary>
+
+You enabled the `web` dyno instead of `worker`. Go to Resources tab → disable `web` → enable `worker`.
+</details>
+
+<details>
+<summary>Database errors on Heroku/Render</summary>
+
+The bot defaults to SQLite (file-based, no config needed). If you want Postgres for persistence across container restarts:
+- **Heroku**: add the *Heroku Postgres* add-on → `DATABASE_URL` is auto-provided.
+- **Render**: create a Postgres instance → copy the External Database URL → paste as `DATABASE_URL` env var.
+- The bot auto-detects and switches drivers based on the URL.
+
+</details>
+
+<details>
+<summary>Want to update the bot to the latest version?</summary>
+
+If you forked: go to your fork on GitHub → click **Sync fork** → **Update branch**. Your deploy auto-redeploys (on Render/Railway/Koyeb) or you click **Deploy latest** (Heroku).
+
+If you cloned to a VPS: `git pull && npm install && pm2 restart titan-md`.
+
+</details>
 
 ---
 

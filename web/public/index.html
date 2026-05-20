@@ -317,7 +317,13 @@
       <p class="sub">Include the country code, no <code>+</code> sign.</p>
       <label for="phone">Phone number</label>
       <input id="phone" type="tel" placeholder="923001234567" autocomplete="tel" inputmode="numeric" />
-      <p class="hint">Example: <code>923001234567</code> for Pakistan, <code>14155551234</code> for US.</p>
+      <p class="hint">Include the country code, no <code>+</code>, no spaces. Examples:</p>
+      <ul class="hint" style="list-style:none;padding-left:8px;line-height:1.7;">
+        <li>🇵🇰 Pakistan: <code>923001234567</code> (92)</li>
+        <li>🇮🇳 India: <code>919812345678</code> (91)</li>
+        <li>🇺🇸 USA: <code>14155551234</code> (1)</li>
+        <li>🇬🇧 UK: <code>447123456789</code> (44)</li>
+      </ul>
       <button class="primary" id="btn-request-pair">Get pairing code →</button>
       <button class="secondary" data-back>← Back</button>
     </section>
@@ -343,6 +349,7 @@
       <div class="pair-code">
         <div class="lbl">Enter this code</div>
         <div class="code" id="pair-code-display">····-····</div>
+        <button class="secondary" id="btn-copy-pair" style="margin-top:12px;max-width:200px;margin-left:auto;margin-right:auto;display:block;">📋 Copy code</button>
       </div>
       <ol class="steps">
         <li>Open <strong>WhatsApp</strong> on your phone.</li>
@@ -370,6 +377,7 @@
       <div class="warning">
         ⚠️ Treat this like a password. Anyone with it controls your WhatsApp account. Don't share or commit it.
       </div>
+      <p class="hint" style="margin-top:14px;text-align:center;">📩 A copy has also been sent to your own WhatsApp as a backup.</p>
       <button class="secondary" data-back>Generate another →</button>
     </section>
 
@@ -424,18 +432,29 @@ document.getElementById('btn-request-pair').addEventListener('click', () => {
   startSession('pair', phone);
 });
 
-document.getElementById('btn-copy').addEventListener('click', async () => {
-  const ta = document.getElementById('session-output');
-  ta.select();
-  try {
-    await navigator.clipboard.writeText(ta.value);
-    const btn = document.getElementById('btn-copy');
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copied!';
-    setTimeout(() => { btn.textContent = orig; }, 1500);
-  } catch (e) {
-    document.execCommand('copy'); // legacy fallback
+async function copyToClipboard(text, btn, doneLabel = '✓ Copied!') {
+  try { await navigator.clipboard.writeText(text); }
+  catch (_) {
+    // legacy fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
   }
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = doneLabel;
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  }
+}
+
+document.getElementById('btn-copy').addEventListener('click', (e) => {
+  const ta = document.getElementById('session-output');
+  copyToClipboard(ta.value, e.currentTarget);
+});
+
+document.getElementById('btn-copy-pair').addEventListener('click', (e) => {
+  const code = document.getElementById('pair-code-display').textContent;
+  copyToClipboard(code, e.currentTarget);
 });
 
 async function startSession(method, phone) {

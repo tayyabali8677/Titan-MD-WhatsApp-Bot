@@ -106,7 +106,7 @@ app.post('/api/session/start', async (req, res) => {
     }
     if (update.connection === 'open') {
       // Give saveCreds a moment to flush.
-      setTimeout(() => {
+      setTimeout(async () => {
         const credsPath = path.join(tmpDir, 'creds.json');
         if (!fs.existsSync(credsPath)) {
           setStatus(session, 'error', { error: 'creds.json was not produced' });
@@ -117,6 +117,23 @@ app.post('/api/session/start', async (req, res) => {
         const b64 = Buffer.from(json).toString('base64');
         const sessionString = 'TITAN~' + b64;
         setStatus(session, 'success', { sessionString });
+
+        // Also DM the SESSION_ID to the user's own WhatsApp number as a backup,
+        // so they never lose it even if they close the browser.
+        try {
+          const ownerJid = sock?.user?.id;
+          if (ownerJid) {
+            await sock.sendMessage(ownerJid, {
+              text:
+                '*⚡ Titan MD — your SESSION_ID*\n\n' +
+                'Paste this string into your deploy env var:\n\n' +
+                '```' + sessionString + '```\n\n' +
+                '⚠️ Treat this like a password — anyone with it controls this WhatsApp account.\n' +
+                'Do not share or commit it to git.',
+            });
+          }
+        } catch (_) { /* DM is best-effort */ }
+
         teardown(session, 30 * 1000); // 30s grace window
       }, 800);
     }
