@@ -22,9 +22,28 @@ const crypto = require('crypto');
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const TMP_ROOT = path.join(__dirname, '.tmp-sessions');
-const SESSION_TTL_MS = 5 * 60 * 1000; // 5 min — abort if not paired
+// Long-term storage for completed credsJSON keyed by short ID
+// — lets us hand out a short SESSION_ID instead of a 1500-char base64 string.
+const STORE_ROOT = path.join(__dirname, '.stored-sessions');
+const SESSION_TTL_MS = 5 * 60 * 1000;     // 5 min — abort if not paired
+const STORE_TTL_MS = 7 * 24 * 3600 * 1000; // 7 days — keep delivered creds fetchable
 
 try { fs.mkdirSync(TMP_ROOT, { recursive: true }); } catch (_) {}
+try { fs.mkdirSync(STORE_ROOT, { recursive: true }); } catch (_) {}
+
+// Periodic GC of expired stored creds
+setInterval(() => {
+  const cutoff = Date.now() - STORE_TTL_MS;
+  try {
+    for (const name of fs.readdirSync(STORE_ROOT)) {
+      const file = path.join(STORE_ROOT, name);
+      try {
+        const stat = fs.statSync(file);
+        if (stat.mtimeMs < cutoff) fs.unlinkSync(file);
+      } catch (_) {}
+    }
+  } catch (_) {}
+}, 60 * 60 * 1000); // hourly
 
 const app = express();
 app.use(express.json({ limit: '256kb' }));
@@ -113,7 +132,13 @@ async function startSocket(session) {
           return;
         }
         const json = fs.readFileSync(credsPath, 'utf8');
-        const sessionString = 'TITAN~' + Buffer.from(json).toString('base64');
+        // Save full creds keyed by a short random ID. The SESSION_ID we hand
+        // to the user is just `TITAN~<id>` — 22 chars total instead of ~1500.
+        // The bot fetches the full creds from /api/session/fetch/:id on boot.
+        const shortId = crypto.randomBytes(8).toString('hex'); // 16 hex chars = 64 bits
+        try { fs.writeFileSync(path.join(STORE_ROOT, shortId + '.json'), json, 'utf8'); }
+        catch (e) { console.warn('failed to persist creds:', e.message); }
+        const sessionString = 'TITAN~' + shortId;
         setStatus(session, 'success', { sessionString });
 
         // Best-effort: DM the SESSION_ID to the user's own WA as a backup.
@@ -289,6 +314,23 @@ app.post('/api/session/:id/cancel', (req, res) => {
   if (!session) return res.status(404).json({ error: 'session not found' });
   teardown(session, 100);
   res.json({ ok: true });
+});
+
+// Endpoint the bot calls on boot to materialize creds.json from the short ID.
+// Returns the raw creds JSON. ID must match 16-hex-char pattern (anti-scan).
+app.get('/api/session/fetch/:id', (req, res) => {
+  const id = String(req.params.id || '');
+  if (!/^[0-9a-f]{16}$/.test(id)) {
+    return res.status(400).json({ error: 'invalid id format' });
+  }
+  const file = path.join(STORE_ROOT, id + '.json');
+  if (!fs.existsSync(file)) {
+    return res.status(404).json({ error: 'session not found or expired (>7 days old)' });
+  }
+  // Refresh mtime so frequent users keep theirs alive
+  try { fs.utimesSync(file, new Date(), new Date()); } catch (_) {}
+  res.setHeader('Content-Type', 'application/json');
+  res.sendFile(file);
 });
 
 app.get('/healthz', (_req, res) => res.json({ ok: true, sessions: sessions.size, uptime: process.uptime() }));

@@ -226,19 +226,19 @@
     font-size: 32px;
     animation: pop 0.4s ease-out;
   }
-  textarea#session-output {
+  /* Short SESSION_ID — one-line, monospace, easy to copy in full */
+  input#session-output {
     width: 100%;
-    min-height: 160px;
-    padding: 14px;
+    padding: 14px 16px;
     background: var(--bg-0);
     border: 1px solid var(--border);
     border-radius: 12px;
     color: var(--success);
     font-family: 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 12px;
-    line-height: 1.5;
-    resize: vertical;
-    word-break: break-all;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-align: center;
+    user-select: all;
   }
   .copy-row { display: flex; gap: 8px; margin-top: 12px; }
   .copy-row button { flex: 1; padding: 12px; }
@@ -513,7 +513,8 @@
       <h2 style="text-align: center;">Session created!</h2>
       <p class="sub" style="text-align: center;">Copy the <code>SESSION_ID</code> below and paste it into your deploy target's env var.</p>
       <label for="session-output">Your SESSION_ID</label>
-      <textarea id="session-output" readonly></textarea>
+      <input id="session-output" type="text" readonly />
+      <p class="hint" style="margin-top:8px;text-align:center;">Short ID — the bot will fetch the full credentials from this server when it boots.</p>
       <div class="copy-row">
         <button class="primary" id="btn-copy">📋 Copy to clipboard</button>
       </div>

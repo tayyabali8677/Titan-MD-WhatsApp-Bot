@@ -233,6 +233,11 @@ module.exports = {
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
   WORKTYPE: trim(process.env.WORKTYPE, 'private'),
 
+  // --- Session ID resolution ---
+  // When SESSION_ID is a short token (TITAN~<16hex>), the bot fetches the full
+  // creds JSON from this server on boot. Defaults to the public Titan MD site.
+  SESSION_SERVER_URL: trim(process.env.SESSION_SERVER_URL, 'https://titan-md-session.onrender.com'),
+
   // --- Mock mode (Titan MD extension) ---
   MOCK_MODE: toBool(process.env.MOCK_MODE) || !trim(process.env.SESSION_ID),
 };
