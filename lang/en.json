@@ -1,0 +1,1737 @@
+{
+    "extra": {
+        "session_msg": "SESSION_ID not set. Running in mock mode.",
+        "connecting": "Connecting to WhatsApp...",
+        "connected": "Titan MD connected.",
+        "disconnected": "Titan MD disconnected.",
+        "db_fail": "Database connection failed.",
+        "sudo_only": "This command is for sudo users only.",
+        "admin_only": "You need to be an admin.",
+        "bot_admin": "Bot must be an admin.",
+        "only_group": "This command can only be used in groups.",
+        "only_pm": "This command can only be used in private chat.",
+        "reply_required": "Please reply to a message.",
+        "not_found": "Not found.",
+        "error": "An error occurred.",
+        "disabled": "This command is disabled.",
+        "success": "Done.",
+        "wait": "Please wait...",
+        "no_key": "API key not configured. See titanmd.site/docs for setup.",
+        "dev": "TitanDev",
+        "site": "titanmd.site"
+    },
+    "plugins": {
+        "1917": {
+            "desc": "Generate 1917-style text-effect sticker"
+        },
+        "common": {
+            "desc": "Find common members between two groups"
+        },
+        "menu": {
+            "desc": "Show command menu",
+            "header": "╭══ TITAN MD ══⊷\n┃✣╭──────────────\n┃✣│ Prefix : {0}\n┃✣│ User : {1}\n┃✣│ Time : {2}\n┃✣│ Day : {3}\n┃✣│ Date : {4}\n┃✣│ Version : {5}\n┃✣│ Plugins : {6}\n┃✣│ Ram : {7}\n┃✣│ Uptime : {8}\n┃✣│ Platform : {9}\n┃✣╰───────────────\n╰══════════════════⊷"
+        },
+        "help": {
+            "desc": "Show flat list of commands"
+        },
+        "list": {
+            "desc": "List commands by category"
+        },
+        "alive": {
+            "desc": "Check if the bot is alive",
+            "message": "*Titan MD is alive!* 🚀\nUptime: {0}\nBy TitanDev — titanmd.site"
+        },
+        "ping": {
+            "desc": "Check bot response time",
+            "message": "🏓 Pong! {0}ms"
+        },
+        "warn": {
+            "desc": "Warn a group member",
+            "warn_message": "⚠️WARNING⚠️\n*User :* &mention\n*Warn :* &warn\n*Remaining :* &remaining\n*Reason :* &reason",
+            "kick_message": "🚫 &mention removed after &warn warnings.",
+            "reset_message": "✅ Warnings reset for &mention. Remaining: &remaining",
+            "no_target": "Reply to or mention a user.",
+            "not_admin": "Bot is not admin.",
+            "user_not_admin": "You must be admin."
+        },
+        "antifake": {
+            "desc": "Block fake/unregistered numbers by country code",
+            "on": "Antifake: *on*",
+            "off": "Antifake: *off*",
+            "allowed": "Whitelisted: {0}",
+            "disallowed": "Blacklisted: {0}",
+            "mix_error": "Clear current list first before switching modes.",
+            "cleared": "List cleared.",
+            "usage": "Usage: antifake <on|off|allow|disallow|remove|clear|list>"
+        },
+        "antilink": {
+            "desc": "Block links in groups",
+            "on": "Antilink: *on*",
+            "off": "Antilink: *off*",
+            "usage": "Usage: antilink <on|off|list|allow|disallow|clear|kick|warn|null>"
+        },
+        "antiwords": {
+            "desc": "Block bad words in groups",
+            "on": "Antiwords: *on*",
+            "off": "Antiwords: *off*",
+            "usage": "Usage: antiwords <on|off|add|remove|list|kick|warn|null>"
+        },
+        "antiedit": {
+            "desc": "Detect and act on edited messages",
+            "on": "Antiedit: *on*",
+            "off": "Antiedit: *off*"
+        },
+        "antigm": {
+            "desc": "Restrict who can change group settings",
+            "on": "Antigm: *on*",
+            "off": "Antigm: *off*"
+        },
+        "antigstatus": {
+            "desc": "Block group status spam",
+            "on": "Antigstatus: *on*",
+            "off": "Antigstatus: *off*"
+        },
+        "group": {
+            "desc": "Group management commands",
+            "not_admin": "Bot is not admin.",
+            "user_not_admin": "You must be admin.",
+            "no_target": "No target found.",
+            "kicked": "✅ Kicked {0}",
+            "promoted": "✅ Promoted {0}",
+            "demoted": "✅ Demoted {0}"
+        },
+        "mute": {
+            "desc": "Schedule auto-mute for a group",
+            "on": "Auto-mute scheduled: {0}",
+            "off": "Auto-mute disabled.",
+            "usage": "Usage: amute <on [cron]|off|info>"
+        },
+        "msgs": {
+            "desc": "Show per-member message counts",
+            "no_data": "No data yet.",
+            "reset": "Message counts reset."
+        },
+        "pdm": {
+            "desc": "Promote/demote event notifications",
+            "on": "PDM notifications: *on*",
+            "off": "PDM notifications: *off*"
+        },
+        "spam": {
+            "desc": "Anti-spam controls",
+            "on": "Anti-spam: *on*",
+            "off": "Anti-spam: *off*"
+        },
+        "greetings": {
+            "desc": "Welcome and goodbye messages for group members",
+            "welcome_set": "Welcome message set: {0}",
+            "goodbye_set": "Goodbye message set: {0}"
+        },
+        "afk": {
+            "desc": "Set AFK status with a reason",
+            "set": "🌙 AFK: {0}",
+            "back": "👋 Welcome back, {0}!"
+        },
+        "mention": {
+            "desc": "Auto-reply when mentioned",
+            "on": "Mention reply: *on*",
+            "off": "Mention reply: *off*"
+        },
+        "sticker": {
+            "desc": "Convert image/video to sticker",
+            "processing": "⏳ Making sticker...",
+            "circle": "⏳ Making circle sticker..."
+        },
+        "media": {
+            "desc": "Media processing utilities (mp3, rotate, trim, etc.)"
+        },
+        "editor": {
+            "desc": "Image editing (blur, grayscale, flip, brightness)"
+        },
+        "exif": {
+            "desc": "View or edit sticker EXIF data",
+            "usage": "Reply to a sticker."
+        },
+        "qr": {
+            "desc": "Create QR code from text or read QR from image",
+            "creating": "⏳ Generating QR...",
+            "reading": "⏳ Reading QR..."
+        },
+        "tts": {
+            "desc": "Convert text to voice message",
+            "usage": "Usage: tts <text>"
+        },
+        "trt": {
+            "desc": "Translate text to another language",
+            "usage": "Usage: trt <lang> <text>"
+        },
+        "gemini": {
+            "desc": "Ask Google Gemini AI",
+            "no_key": "GEMINI_API_KEY not configured. See titanmd.site/docs for setup.",
+            "usage": "Usage: gemini <question>"
+        },
+        "groq": {
+            "desc": "Ask Groq LLM",
+            "no_key": "GROQ_API_KEY not configured. See titanmd.site/docs for setup.",
+            "usage": "Usage: groq <question>"
+        },
+        "chatgpt": {
+            "desc": "Ask ChatGPT",
+            "no_key": "GPT API not configured.",
+            "usage": "Usage: chatgpt <question>"
+        },
+        "bing": {
+            "desc": "Bing image search",
+            "no_key": "BING_COOKIE not configured.",
+            "usage": "Usage: bing <query>"
+        },
+        "lydia": {
+            "desc": "Chat with Lydia AI",
+            "usage": "Usage: lydia <message>"
+        },
+        "gauth": {
+            "desc": "Google OAuth authentication flow",
+            "no_creds": "Import credentials.json first: .gauth import (reply to file).",
+            "authed": "✅ Authenticated.",
+            "not_authed": "❌ Not authenticated.",
+            "logout": "Logged out.",
+            "usage": "Usage: gauth <auth|code|import|status|logout>"
+        },
+        "gdrive": {
+            "desc": "Google Drive upload, list, delete",
+            "not_authed": "[mock gdrive] not authenticated — sample: file1.pdf, photo.jpg",
+            "usage": "Usage: gdrive <list|upload|delete>"
+        },
+        "task": {
+            "desc": "Google Tasks management",
+            "not_authed": "[mock task] not authenticated.",
+            "usage": "Usage: task <list|list-lists|list-switch|add|del|done|update>"
+        },
+        "reminder": {
+            "desc": "Google Calendar reminders with natural language time",
+            "not_authed": "[mock] reminder requires .gauth.",
+            "usage": "Usage: reminder <add|list|del>"
+        },
+        "backup": {
+            "desc": "Backup session data to Google Drive",
+            "not_authed": "[mock] backup requires .gauth.",
+            "done": "✅ Session backed up to Drive."
+        },
+        "spotify": {
+            "desc": "Download from Spotify",
+            "usage": "Usage: spotify <url>"
+        },
+        "facebook": {
+            "desc": "Download from Facebook",
+            "usage": "Usage: facebook <url>"
+        },
+        "pinterest": {
+            "desc": "Download from Pinterest",
+            "usage": "Usage: pinterest <url>"
+        },
+        "tiktok": {
+            "desc": "Download from TikTok",
+            "usage": "Usage: tiktok <url>"
+        },
+        "twitter": {
+            "desc": "Download from Twitter/X",
+            "usage": "Usage: twitter <url>"
+        },
+        "reddit": {
+            "desc": "Download from Reddit",
+            "usage": "Usage: reddit <url>"
+        },
+        "insta": {
+            "desc": "Download from Instagram",
+            "usage": "Usage: insta <url>"
+        },
+        "story": {
+            "desc": "Download stories",
+            "usage": "Usage: story <url>"
+        },
+        "ytv": {
+            "desc": "Download YouTube video",
+            "usage": "Usage: ytv <url|query>"
+        },
+        "yta": {
+            "desc": "Download YouTube audio",
+            "usage": "Usage: yta <url|query>"
+        },
+        "yts": {
+            "desc": "Search YouTube",
+            "usage": "Usage: yts <query>"
+        },
+        "y2mate": {
+            "desc": "Download via y2mate",
+            "usage": "Usage: y2mate <url>"
+        },
+        "mediafire": {
+            "desc": "Download from Mediafire",
+            "usage": "Usage: mediafire <url>"
+        },
+        "apk": {
+            "desc": "Download APK",
+            "usage": "Usage: apk <app name>"
+        },
+        "img": {
+            "desc": "Search for images",
+            "usage": "Usage: img <query>"
+        },
+        "news": {
+            "desc": "Fetch latest news",
+            "usage": "Usage: news [topic]"
+        },
+        "removebg": {
+            "desc": "Remove image background",
+            "no_key": "RMBG_KEY not configured.",
+            "usage": "Reply to an image."
+        },
+        "poll": {
+            "desc": "Create a WhatsApp poll",
+            "usage": "Usage: poll question,opt1,opt2[,opt3]"
+        },
+        "vote": {
+            "desc": "Create a vote message",
+            "usage": "Usage: vote <question>"
+        },
+        "react": {
+            "desc": "React to a message with an emoji",
+            "usage": "Reply to a message."
+        },
+        "budget": {
+            "desc": "Track income and expenses",
+            "income_added": "✅ +{0} income recorded.",
+            "expense_added": "✅ -{0} expense recorded.",
+            "cleared": "Budget cleared.",
+            "usage": "Usage: income/expense <amount> [note]"
+        },
+        "filters": {
+            "desc": "Auto-reply keyword filters (local)",
+            "added": "✅ Filter added: {0}",
+            "removed": "✅ Filter removed.",
+            "usage": "Usage: filters add <trigger> <reply>  |  filters remove <trigger>"
+        },
+        "gfilters": {
+            "desc": "Auto-reply keyword filters (global)",
+            "added": "✅ Global filter added: {0}",
+            "removed": "✅ Global filter removed."
+        },
+        "pfilter": {
+            "desc": "Auto-reply keyword filters (personal/DM)"
+        },
+        "heroku": {
+            "desc": "Heroku app management",
+            "no_key": "[mock heroku] HEROKU_API_KEY not set.",
+            "restarting": "♻️ Restarting {0}...",
+            "shutting": "⏹️ Shutting down...",
+            "quota": "📊 Quota: 550h free remaining (mock)."
+        },
+        "pm2": {
+            "desc": "Restart PM2 process",
+            "rebooting": "♻️ Rebooting via pm2..."
+        },
+        "vars": {
+            "desc": "Set/get/delete runtime config vars",
+            "set": "✅ Set {0}",
+            "deleted": "✅ Deleted {0}",
+            "usage": "Usage: setvar KEY value"
+        },
+        "tog": {
+            "desc": "Enable or disable any command",
+            "usage": "Usage: tog <command> <on|off>"
+        },
+        "plugins": {
+            "desc": "Install/list/remove external plugins from Gist URL",
+            "installed": "✅ Plugin installed from {0}",
+            "removed": "✅ Removed plugin {0}",
+            "usage": "Usage: install <gist-url>"
+        },
+        "misc": {
+            "desc": "Miscellaneous utilities"
+        },
+        "pp": {
+            "desc": "Get a user's profile picture",
+            "usage": "Reply to or mention a user."
+        },
+        "profile": {
+            "desc": "View profile info"
+        },
+        "whois": {
+            "desc": "Look up a number via Truecaller",
+            "no_key": "[mock truecaller] TRUECALLER not configured.",
+            "usage": "Usage: whois <number>"
+        },
+        "nr": {
+            "desc": "Number lookup / Truecaller",
+            "usage": "Usage: nr <number>"
+        },
+        "weather": {
+            "desc": "Get weather for a location",
+            "usage": "Usage: weather <city>"
+        },
+        "movie": {
+            "desc": "Search movie info (OMDB)",
+            "usage": "Usage: movie <title>"
+        },
+        "ss": {
+            "desc": "Take a screenshot of a URL",
+            "usage": "Usage: ss <url>"
+        },
+        "url": {
+            "desc": "Preview or shorten a URL",
+            "usage": "Usage: url <url>"
+        },
+        "upload": {
+            "desc": "Upload media and return a public link"
+        },
+        "ison": {
+            "desc": "Check if a number is on WhatsApp",
+            "usage": "Usage: ison <number>"
+        },
+        "tag": {
+            "desc": "Tag group members (all/admin/notadmin)"
+        },
+        "setstatus": {
+            "desc": "Send WhatsApp status to contacts",
+            "usage": "Usage: setstatus <text>"
+        },
+        "scstatus": {
+            "desc": "Schedule a WhatsApp status",
+            "usage": "Usage: scstatus <cron> <text>"
+        },
+        "tictactoe": {
+            "desc": "Play TicTacToe (normal or infinite mode)",
+            "started": "TicTacToe started ({0}). {1} goes first.\n{2}",
+            "your_turn": "{0}'s turn.",
+            "winner": "🏆 Winner: {0}\n{1}",
+            "draw": "🤝 It's a draw!\n{0}",
+            "bad_move": "Invalid move.",
+            "ended": "Game ended."
+        },
+        "wcg": {
+            "desc": "Word chain game",
+            "started": "📝 Word chain started. Players: {0}. Send a word!",
+            "joined": "✅ {0} joined.",
+            "wrong_letter": "❌ Wrong starting letter. {0} loses! Last: {1}, your word: {2}",
+            "ok": "✅ Next: {0}'s turn — word must start with '{1}'",
+            "timeout": "⏰ Timeout! {0} loses.",
+            "ended": "Game ended.",
+            "used": "That word was already used."
+        },
+        "fancy": {
+            "desc": "Convert text to fancy Unicode styles",
+            "usage": "Usage: fancy <text>"
+        },
+        "forward": {
+            "desc": "Forward a replied message",
+            "usage": "Reply to a message to forward."
+        },
+        "delete": {
+            "desc": "Delete a message for everyone",
+            "usage": "Reply to the message to delete."
+        },
+        "dlt": {
+            "desc": "Delete your last sent message"
+        },
+        "clear": {
+            "desc": "Clear chat messages",
+            "usage": "Usage: clear [count]"
+        },
+        "cmd": {
+            "desc": "Enable or disable commands (alias for tog)"
+        },
+        "greet": {
+            "desc": "Manual welcome/greeting for a user"
+        },
+        "gpp": {
+            "desc": "Set or view group profile picture"
+        },
+        "scheduleMessage": {
+            "desc": "Schedule a message to send later",
+            "usage": "Usage: schedule <time> <message>"
+        },
+        "ban": {
+            "desc": "Ban a user from the group",
+            "done": "✅ {0} has been banned.",
+            "usage": "Reply to or mention a user."
+        },
+        "unban": {
+            "desc": "Unban a user",
+            "done": "✅ {0} has been unbanned."
+        },
+        "groupinfo": {
+            "desc": "Show detailed group information"
+        },
+        "hidetag": {
+            "desc": "Tag all members silently",
+            "usage": "Usage: hidetag [message]"
+        },
+        "antitag": {
+            "desc": "Prevent tag spam in group",
+            "on": "Anti-tag: *on*",
+            "off": "Anti-tag: *off*"
+        },
+        "anticall": {
+            "desc": "Auto-reject incoming calls",
+            "on": "Anti-call: *on*",
+            "off": "Anti-call: *off*"
+        },
+        "pmblocker": {
+            "desc": "Block strangers from DM",
+            "on": "PM blocker: *on*",
+            "off": "PM blocker: *off*"
+        },
+        "topmembers": {
+            "desc": "Show top active members by message count"
+        },
+        "warnings": {
+            "desc": "List all warnings for a user or group"
+        },
+        "attp": {
+            "desc": "Convert text to animated sticker",
+            "usage": "Usage: attp <text>"
+        },
+        "wasted": {
+            "desc": "Apply GTA wasted effect to an image",
+            "usage": "Reply to an image."
+        },
+        "take": {
+            "desc": "Steal/copy a sticker with custom metadata",
+            "usage": "Reply to a sticker."
+        },
+        "setpp": {
+            "desc": "Set your or group profile picture",
+            "usage": "Reply to an image."
+        },
+        "textmaker": {
+            "desc": "Generate stylish text art",
+            "usage": "Usage: textmaker <style> <text>"
+        },
+        "viewonce": {
+            "desc": "Re-send a view-once message",
+            "usage": "Reply to a view-once message."
+        },
+        "emojimix": {
+            "desc": "Mix two emojis together",
+            "usage": "Usage: emojimix <emoji1> <emoji2>"
+        },
+        "eightball": {
+            "desc": "Ask the magic 8-ball a question",
+            "usage": "Usage: 8ball <question>"
+        },
+        "fact": {
+            "desc": "Get a random interesting fact"
+        },
+        "joke": {
+            "desc": "Get a random joke"
+        },
+        "quote": {
+            "desc": "Get a random inspirational quote"
+        },
+        "compliment": {
+            "desc": "Send a compliment"
+        },
+        "flirt": {
+            "desc": "Send a flirty message"
+        },
+        "insult": {
+            "desc": "Roast someone (fun only)"
+        },
+        "shayari": {
+            "desc": "Get a random Urdu/Hindi shayari"
+        },
+        "ship": {
+            "desc": "Calculate compatibility between two users",
+            "usage": "Usage: ship @user1 @user2"
+        },
+        "pair": {
+            "desc": "Pair two users together",
+            "usage": "Usage: pair @user1 @user2"
+        },
+        "meme": {
+            "desc": "Fetch a random meme"
+        },
+        "gif": {
+            "desc": "Search for a GIF",
+            "usage": "Usage: gif <query>"
+        },
+        "goodnight": {
+            "desc": "Send a goodnight message"
+        },
+        "hangman": {
+            "desc": "Play hangman",
+            "started": "Hangman started! Word: {0}\nGuesses left: {1}",
+            "win": "🎉 You won! The word was: {0}",
+            "lose": "💀 You lost! The word was: {0}",
+            "wrong": "❌ Wrong! Letter: {0}. Remaining: {1}",
+            "correct": "✅ Correct! {0}",
+            "already": "You already guessed that letter.",
+            "usage": "Usage: hangman start | hangman <letter>"
+        },
+        "trivia": {
+            "desc": "Play a trivia quiz",
+            "question": "❓ {0}\n\nA) {1}\nB) {2}\nC) {3}\nD) {4}\n\nReply with A, B, C or D",
+            "correct": "✅ Correct! +1 point",
+            "wrong": "❌ Wrong! Answer was: {0}"
+        },
+        "truth": {
+            "desc": "Get a truth question for truth or dare"
+        },
+        "dare": {
+            "desc": "Get a dare challenge for truth or dare"
+        },
+        "lyrics": {
+            "desc": "Search for song lyrics",
+            "usage": "Usage: lyrics <song name>"
+        },
+        "github": {
+            "desc": "Look up a GitHub user or repository",
+            "usage": "Usage: github <user> or github <user/repo>"
+        },
+        "autodl": {
+            "desc": "Auto-download links sent in chat",
+            "on": "Auto-downloader: *on*",
+            "off": "Auto-downloader: *off*"
+        },
+        "chatbot": {
+            "desc": "Toggle AI chatbot mode",
+            "on": "Chatbot: *on*",
+            "off": "Chatbot: *off*"
+        },
+        "autotyping": {
+            "desc": "Toggle auto-typing status",
+            "on": "Auto-typing: *on*",
+            "off": "Auto-typing: *off*"
+        },
+        "autoread": {
+            "desc": "Toggle auto-read for messages",
+            "on": "Auto-read: *on*",
+            "off": "Auto-read: *off*"
+        },
+        "autoreact": {
+            "desc": "Toggle auto-react to messages",
+            "on": "Auto-react: *on*",
+            "off": "Auto-react: *off*"
+        },
+        "autoreply": {
+            "desc": "Set an auto-reply message",
+            "on": "Auto-reply: *on*",
+            "off": "Auto-reply: *off*",
+            "usage": "Usage: autoreply <message> | autoreply off"
+        },
+        "takesticker": {
+            "desc": "Take sticker and re-tag with bot info"
+        },
+        "privacy": {
+            "desc": "Manage WhatsApp privacy settings"
+        },
+        "getprivacy": {
+            "desc": "Show current WhatsApp privacy settings"
+        },
+        "lastseen": {
+            "desc": "Change last seen privacy [all/contacts/none]",
+            "usage": ".lastseen [all/contacts/contact_blacklist/none]"
+        },
+        "online": {
+            "desc": "Change online visibility privacy",
+            "usage": ".online [all/match_last_seen]"
+        },
+        "mypp": {
+            "desc": "Change profile picture privacy",
+            "usage": ".mypp [all/contacts/contact_blacklist/none]"
+        },
+        "mystatus": {
+            "desc": "Change status privacy setting",
+            "usage": ".mystatus [all/contacts/contact_blacklist/none]"
+        },
+        "groupadd": {
+            "desc": "Control who can add you to groups",
+            "usage": ".groupadd [all/contacts/contact_blacklist/none]"
+        },
+        "chatmgmt": {
+            "desc": "Manage chats: archive, pin, read, mute, and profile"
+        },
+        "archive": {
+            "desc": "Archive the current chat"
+        },
+        "unarchive": {
+            "desc": "Unarchive the current chat"
+        },
+        "chatpin": {
+            "desc": "Pin the current chat"
+        },
+        "unpin": {
+            "desc": "Unpin the current chat"
+        },
+        "markread": {
+            "desc": "Mark the current chat as read"
+        },
+        "markunread": {
+            "desc": "Mark the current chat as unread"
+        },
+        "unmutechat": {
+            "desc": "Unmute the current chat notifications"
+        },
+        "profilename": {
+            "desc": "Change your WhatsApp profile name",
+            "usage": ".profilename <name>"
+        },
+        "anime": {
+            "desc": "Anime images, news, and Pokémon info"
+        },
+        "waifu": {
+            "desc": "Get a random waifu anime image"
+        },
+        "neko": {
+            "desc": "Get a random neko anime image"
+        },
+        "megumin": {
+            "desc": "Get a random Megumin anime image"
+        },
+        "foxgirl": {
+            "desc": "Get a random fox girl anime image"
+        },
+        "demon": {
+            "desc": "Get a random Demon Slayer anime image"
+        },
+        "naruto": {
+            "desc": "Get a random Naruto anime video"
+        },
+        "pokepic": {
+            "desc": "Get a Pokémon image",
+            "usage": ".pokepic <name>"
+        },
+        "animewall": {
+            "desc": "Get an HD anime wallpaper"
+        },
+        "animenews": {
+            "desc": "Get latest anime news"
+        },
+        "pokemon": {
+            "desc": "Get Pokémon stats and info",
+            "usage": ".pokemon <name>"
+        },
+        "imgfx": {
+            "desc": "Apply image effects and filters"
+        },
+        "invert": {
+            "desc": "Invert colors of an image"
+        },
+        "sepia": {
+            "desc": "Apply sepia filter to an image"
+        },
+        "rainbow": {
+            "desc": "Apply rainbow effect to an image"
+        },
+        "beautiful": {
+            "desc": "Apply beauty filter to an image"
+        },
+        "rip": {
+            "desc": "Apply RIP gravestone overlay to an image"
+        },
+        "wanted": {
+            "desc": "Apply wanted poster overlay to an image"
+        },
+        "facepalm": {
+            "desc": "Apply facepalm meme overlay to an image"
+        },
+        "trash": {
+            "desc": "Apply trash overlay to an image"
+        },
+        "define": {
+            "desc": "Look up a word on Urban Dictionary",
+            "usage": ".define <word>"
+        },
+        "wa": {
+            "desc": "Get wa.me link for a mentioned or replied user"
+        },
+        "mee": {
+            "desc": "Get your own wa.me link"
+        },
+        "groupext": {
+            "desc": "Extended group management commands"
+        },
+        "gdesc": {
+            "desc": "Show the current group description"
+        },
+        "setgdesc": {
+            "desc": "Set the group description",
+            "usage": ".setgdesc <text>"
+        },
+        "setgname": {
+            "desc": "Set the group name/subject",
+            "usage": ".setgname <name>"
+        },
+        "welcometext": {
+            "desc": "Set custom welcome text for new members",
+            "usage": ".welcometext <text>"
+        },
+        "goodbyetext": {
+            "desc": "Set custom goodbye text for leaving members",
+            "usage": ".goodbyetext <text>"
+        },
+        "newgc": {
+            "desc": "Create a new WhatsApp group",
+            "usage": ".newgc <group name>"
+        },
+        "tagadmin": {
+            "desc": "Tag all group admins"
+        },
+        "allgc": {
+            "desc": "List all groups the bot is in"
+        },
+        "nsfw": {
+            "desc": "Toggle NSFW mode for the group",
+            "on": "NSFW: *on*",
+            "off": "NSFW: *off*"
+        },
+        "announce": {
+            "desc": "Toggle group announcement mode (admins only)",
+            "on": "Announce mode: *on*",
+            "off": "Announce mode: *off*"
+        },
+        "listrequest": {
+            "desc": "List pending group join requests"
+        },
+        "acceptjoin": {
+            "desc": "Accept a pending group join request"
+        },
+        "rejectjoin": {
+            "desc": "Reject a pending group join request"
+        },
+        "acceptall": {
+            "desc": "Accept all pending group join requests"
+        },
+        "rejectall": {
+            "desc": "Reject all pending group join requests"
+        },
+        "broadcast": {
+            "desc": "Broadcast a message to all groups",
+            "usage": ".broadcast <message>"
+        },
+        "economy": {
+            "desc": "Economy system: earn, spend, and rob coins"
+        },
+        "money": {
+            "desc": "Check your economy balance"
+        },
+        "rob": {
+            "desc": "Try to rob coins from another user",
+            "success": "💰 You robbed {0} coins from {1}!",
+            "fail": "❌ You got caught! Lost {0} coins."
+        },
+        "dlmore": {
+            "desc": "Extended downloaders: ringtones, APKs, and GitHub repos"
+        },
+        "ringtone": {
+            "desc": "Search and download a ringtone",
+            "usage": ".ringtone <name>"
+        },
+        "gitclone": {
+            "desc": "Download a GitHub repository as zip",
+            "usage": ".gitclone <github-url>"
+        },
+        "apksearch": {
+            "desc": "Search for an APK on APKPure",
+            "usage": ".apksearch <app name>"
+        },
+        "modapk": {
+            "desc": "Search for a modded APK",
+            "usage": ".modapk <app name>"
+        },
+        "status": {
+            "desc": "Toggle auto status view [on/off]"
+        },
+        "call": {
+            "desc": "Toggle auto call rejection [on/off]"
+        },
+        "setread": {
+            "desc": "Toggle send read receipts [on/off]"
+        },
+        "setonline": {
+            "desc": "Toggle always-online mode [on/off]"
+        },
+        "skull": {
+            "desc": "Apply skull photo editor effect"
+        },
+        "sketch": {
+            "desc": "Apply sketch photo editor effect"
+        },
+        "pencil": {
+            "desc": "Apply pencil drawing effect to image"
+        },
+        "color": {
+            "desc": "Apply color enhancement effect to image"
+        },
+        "kiss": {
+            "desc": "Apply kiss photo effect"
+        },
+        "bokeh": {
+            "desc": "Apply bokeh background blur effect"
+        },
+        "look": {
+            "desc": "Apply dramatic look photo effect"
+        },
+        "gandm": {
+            "desc": "Apply glamour and mystery photo effect"
+        },
+        "dark": {
+            "desc": "Apply dark mood photo effect"
+        },
+        "makeup": {
+            "desc": "Apply makeup photo effect"
+        },
+        "cartoon": {
+            "desc": "Apply cartoon effect to image"
+        },
+        "bloody": {
+            "desc": "Apply bloody horror effect to image"
+        },
+        "zombie": {
+            "desc": "Apply zombie effect to image"
+        },
+        "horned": {
+            "desc": "Apply horned demon effect to image"
+        },
+        "enhance": {
+            "desc": "Enhance/upscale image quality"
+        },
+        "circle": {
+            "desc": "Make a circle/round sticker from image"
+        },
+        "stickercrop": {
+            "desc": "Crop a sticker to square format"
+        },
+        "simage": {
+            "desc": "Convert a sticker back to image"
+        },
+        "zushi": {
+            "desc": "Zushi character alive response"
+        },
+        "yami": {
+            "desc": "Yami character alive response"
+        },
+        "ope": {
+            "desc": "Ope character alive response"
+        },
+        "coinflip": {
+            "desc": "Flip a coin � heads or tails"
+        },
+        "lgbt": {
+            "desc": "Apply LGBT flag overlay to image"
+        },
+        "lolice": {
+            "desc": "Apply lolice overlay to image"
+        },
+        "jail": {
+            "desc": "Apply jail bars overlay to image"
+        },
+        "slots": {
+            "desc": "Play slot machine"
+        },
+        "lied": {
+            "desc": "Apply lied effect overlay"
+        },
+        "triggered": {
+            "desc": "Apply triggered effect to image"
+        },
+        "comrade": {
+            "desc": "Apply comrade overlay to image"
+        },
+        "riddle": {
+            "desc": "Get a riddle to solve"
+        },
+        "namecard": {
+            "desc": "Generate a custom name card",
+            "usage": ".namecard <name>|<birthday>|<desc>"
+        },
+        "dice": {
+            "desc": "Roll a dice",
+            "usage": ".dice [sides]"
+        },
+        "typerace": {
+            "desc": "Typing race challenge"
+        },
+        "wrg": {
+            "desc": "Word rearrange game - unscramble the word"
+        },
+        "ytcomment": {
+            "desc": "Generate a fake YouTube comment card",
+            "usage": ".ytcomment <username>|<comment>"
+        },
+        "tonikawa": {
+            "desc": "Apply Tonikawa anime overlay"
+        },
+        "calc": {
+            "desc": "Calculate a math expression",
+            "usage": ".calc 2+2"
+        },
+        "gay": {
+            "desc": "Apply gay pride flag overlay"
+        },
+        "simpcard": {
+            "desc": "Generate a simp card for a user"
+        },
+        "heart": {
+            "desc": "Apply heart frame overlay to image"
+        },
+        "passed": {
+            "desc": "Apply passed stamp overlay to image"
+        },
+        "glass": {
+            "desc": "Apply glass/blur overlay effect"
+        },
+        "tweet": {
+            "desc": "Generate a fake tweet card",
+            "usage": ".tweet <name>|<username>|<text>"
+        },
+        "oogway": {
+            "desc": "Generate Oogway quote image",
+            "usage": ".oogway <quote text>"
+        },
+        "oogway2": {
+            "desc": "Generate Oogway quote image style 2",
+            "usage": ".oogway2 <quote text>"
+        },
+        "downloads2": {
+            "desc": "Extended download commands: song, video, lofi, audio, google, ig"
+        },
+        "grouptools2": {
+            "desc": "Extra group tools: leave, lock/unlock, status, diff, JIDs, quoted, info, common, inactive"
+        },
+        "tagtools": {
+            "desc": "Tag specific subsets of group members: non-admins or everyone"
+        },
+        "song": {
+            "desc": "Download a song from YouTube",
+            "usage": ".song <name>"
+        },
+        "video": {
+            "desc": "Download a video by name or URL",
+            "usage": ".video <name/URL>"
+        },
+        "lofi": {
+            "desc": "Stream lofi chill music"
+        },
+        "audio": {
+            "desc": "Download audio from a URL",
+            "usage": ".audio <URL>"
+        },
+        "google": {
+            "desc": "Search Google for a query",
+            "usage": ".google <query>"
+        },
+        "ig": {
+            "desc": "Get Instagram account info",
+            "usage": ".ig <username>"
+        },
+        "leave": {
+            "desc": "Bot leaves the current group"
+        },
+        "glock": {
+            "desc": "Lock group � only admins can send messages"
+        },
+        "gunlock": {
+            "desc": "Unlock group � everyone can send messages"
+        },
+        "gstatus": {
+            "desc": "Post a message to group status",
+            "usage": ".gstatus <text>"
+        },
+        "diff": {
+            "desc": "Compare members between two groups"
+        },
+        "getjids": {
+            "desc": "List all JIDs/numbers in the group"
+        },
+        "quoted": {
+            "desc": "Recover and display a quoted/deleted message"
+        },
+        "ginfo": {
+            "desc": "Show group info (name, members, description)"
+        },
+        "inactive": {
+            "desc": "Show inactive members in the group"
+        },
+        "tagnotadmin": {
+            "desc": "Tag all non-admin members in group"
+        },
+        "tagall": {
+            "desc": "Tag all members in the group"
+        },
+        "autostatus": {
+            "desc": "Toggle automatic status viewing",
+            "on": "Auto status: *on*",
+            "off": "Auto status: *off*"
+        },
+        "antidelete": {
+            "desc": "Toggle anti-delete (resend deleted messages)",
+            "on": "Anti-delete: *on*",
+            "off": "Anti-delete: *off*"
+        },
+        "antispam": {
+            "desc": "Toggle anti-spam protection",
+            "on": "Anti-spam: *on*",
+            "off": "Anti-spam: *off*"
+        },
+        "save": {
+            "desc": "Save a replied message to saved messages"
+        },
+        "imagine": {
+            "desc": "Generate an image using AI",
+            "usage": ".imagine <prompt>"
+        },
+        "remini": {
+            "desc": "Enhance image quality using Remini AI"
+        },
+        "character": {
+            "desc": "Search anime character information",
+            "usage": ".character <name>"
+        },
+        "simp": {
+            "desc": "Check simp level of a user",
+            "usage": ".simp <name>"
+        },
+        "stupid": {
+            "desc": "Check stupid level of a user",
+            "usage": ".stupid <name>"
+        },
+        "sudo": {
+            "desc": "Manage sudo/owner users",
+            "usage": ".sudo add/remove/list <number>"
+        },
+        "clearsession": {
+            "desc": "Clear the WhatsApp bot session"
+        },
+        "cleartmp": {
+            "desc": "Clear temporary/cache files"
+        },
+        "update": {
+            "desc": "Check for bot updates from GitHub"
+        },
+        "updatenow": {
+            "desc": "Force pull latest bot updates from GitHub"
+        },
+        "setschedule": {
+            "desc": "Set a scheduled/cron message",
+            "usage": ".setschedule <cron> | <message>"
+        },
+        "getschedule": {
+            "desc": "List all active scheduled messages"
+        },
+        "delschedule": {
+            "desc": "Delete a scheduled message by number",
+            "usage": ".delschedule <number>"
+        },
+        "password": {
+            "desc": "Generate a secure random password",
+            "usage": ".password [length]"
+        },
+        "encode": {
+            "desc": "Base64 encode a text string",
+            "usage": ".encode <text>"
+        },
+        "decode": {
+            "desc": "Base64 decode a string",
+            "usage": ".decode <base64>"
+        },
+        "setbio": {
+            "desc": "Set your WhatsApp about/bio text",
+            "usage": ".setbio <text>"
+        },
+        "bio": {
+            "desc": "Get someone's WhatsApp bio/about text"
+        },
+        "numfact": {
+            "desc": "Get an interesting fact about a number",
+            "usage": ".numfact [number]"
+        },
+        "catfact": {
+            "desc": "Get a random interesting cat fact"
+        },
+        "dogfact": {
+            "desc": "Get a random interesting dog fact"
+        },
+        "stop": {
+            "desc": "Remove a local group filter keyword",
+            "usage": ".stop <keyword>"
+        },
+        "gstop": {
+            "desc": "Remove a global filter keyword",
+            "usage": ".gstop <keyword>"
+        },
+        "pstop": {
+            "desc": "Remove a personal filter keyword",
+            "usage": ".pstop <keyword>"
+        },
+        "affect": {
+            "desc": "Apply affect overlay effect to an image"
+        },
+        "ad": {
+            "desc": "Apply advertisement overlay effect to an image"
+        },
+        "uncover": {
+            "desc": "Apply uncover reveal effect to an image"
+        },
+        "clown": {
+            "desc": "Apply clown face effect to an image"
+        },
+        "mnm": {
+            "desc": "Turn yourself into an M&M character"
+        },
+        "pet": {
+            "desc": "Create a petting hand GIF on replied image"
+        },
+        "drip": {
+            "desc": "Apply drip/Supreme effect to an image"
+        },
+        "gun": {
+            "desc": "Apply gun-to-head overlay on an image"
+        },
+        "colorify": {
+            "desc": "Colorize a grayscale image with AI"
+        },
+        "trump": {
+            "desc": "Create a Trump tweet meme with your text"
+        },
+        "ronaldo": {
+            "desc": "Create a Ronaldo say meme with your text"
+        },
+        "mia": {
+            "desc": "Create a Mia Khalifa say meme with your text"
+        },
+        "johni": {
+            "desc": "Create a Johnny Depp say meme with your text"
+        },
+        "modi": {
+            "desc": "Create a Modi say meme with your text"
+        },
+        "elon": {
+            "desc": "Create an Elon Musk tweet meme with your text"
+        },
+        "imran": {
+            "desc": "Create an Imran Khan say meme with your text"
+        },
+        "mark": {
+            "desc": "Create a Mark Zuckerberg say meme with your text"
+        },
+        "kofi": {
+            "desc": "Create a Kofi say meme with your text"
+        },
+        "daily": {
+            "desc": "Claim your daily coin reward (once per 24h)"
+        },
+        "resetwallet": {
+            "desc": "Reset a user wallet to zero (sudo only)"
+        },
+        "capacity": {
+            "desc": "Upgrade your bank coin capacity"
+        },
+        "question": {
+            "desc": "Get a random trivia question"
+        },
+        "setcmd": {
+            "desc": "Save a custom command and its reply"
+        },
+        "getcmd": {
+            "desc": "List or view a custom command"
+        },
+        "delcmd": {
+            "desc": "Delete a custom command"
+        },
+        "listcmd": {
+            "desc": "List all custom commands"
+        },
+        "setgreet": {
+            "desc": "Set custom welcome/goodbye message template"
+        },
+        "getgreet": {
+            "desc": "View saved welcome/goodbye templates"
+        },
+        "delgreet": {
+            "desc": "Delete a welcome or goodbye template"
+        },
+        "mode": {
+            "desc": "View or change bot mode (public/private/inbox/groups)"
+        },
+        "vv": {
+            "desc": "Reveal view-once media as a normal message"
+        },
+        "uptime": {
+            "desc": "Show how long the bot has been running"
+        },
+        "owner": {
+            "desc": "Get the bot owner contact details"
+        },
+        "repo": {
+            "desc": "Get the Titan MD repository link"
+        },
+        "language": {
+            "desc": "View or change the bot language"
+        },
+        "cancel": {
+            "desc": "Cancel a pending scheduled message"
+        },
+        "retry": {
+            "desc": "Retry the last failed command"
+        },
+        "edit": {
+            "desc": "Edit the bot last sent message"
+        },
+        "dyno": {
+            "desc": "Restart Heroku/Render dyno"
+        },
+        "dall": {
+            "desc": "Delete all bot messages in the chat"
+        },
+        "read": {
+            "desc": "Mark current chat as read"
+        },
+        "fullss": {
+            "desc": "Take a full-page screenshot of a URL"
+        },
+        "setsudo": {
+            "desc": "Add a user to the sudo list"
+        },
+        "getsudo": {
+            "desc": "Show all sudo users"
+        },
+        "delsudo": {
+            "desc": "Remove a user from the sudo list"
+        },
+        "resetwarn": {
+            "desc": "Reset all warns for a user or group"
+        },
+        "rmwarn": {
+            "desc": "Remove one warn from a user"
+        },
+        "setwarnlimit": {
+            "desc": "Set the maximum warns before kick"
+        },
+        "warnlist": {
+            "desc": "List all warned users in the current group"
+        },
+        "warnstats": {
+            "desc": "Show total warning statistics"
+        },
+        "antibot": {
+            "desc": "Toggle auto-kick for bots in the group"
+        },
+        "antipromote": {
+            "desc": "Auto-revert promotion changes made by non-bot"
+        },
+        "antidemote": {
+            "desc": "Auto-revert demotion changes made by non-bot"
+        },
+        "slow": {
+            "desc": "Toggle slow mode for the group"
+        },
+        "slowmo": {
+            "desc": "Alias for slow mode toggle"
+        },
+        "stickcmd": {
+            "desc": "Bind a sticker to a command (sticker triggers command)"
+        },
+        "unstick": {
+            "desc": "Unbind a sticker command"
+        },
+        "getstick": {
+            "desc": "List all sticker-bound commands"
+        },
+        "fullgpp": {
+            "desc": "Show the full-size group profile picture"
+        },
+        "setmention": {
+            "desc": "Toggle whether bot replies to mentions"
+        },
+        "setgpp": {
+            "desc": "Set group profile picture from replied image"
+        },
+        "admins": {
+            "desc": "List all admins in the current group"
+        },
+        "listadmin": {
+            "desc": "List all admins in the current group"
+        },
+        "metallic": {
+            "desc": "Generate metallic text-effect sticker"
+        },
+        "ice": {
+            "desc": "Generate ice text-effect sticker"
+        },
+        "neon": {
+            "desc": "Generate neon text-effect sticker"
+        },
+        "snow": {
+            "desc": "Generate snow text-effect sticker"
+        },
+        "matrix": {
+            "desc": "Generate matrix text-effect sticker"
+        },
+        "devil": {
+            "desc": "Generate devil text-effect sticker"
+        },
+        "thunder": {
+            "desc": "Generate thunder text-effect sticker"
+        },
+        "leaves": {
+            "desc": "Generate leaves text-effect sticker"
+        },
+        "arena": {
+            "desc": "Generate arena text-effect sticker"
+        },
+        "hacker": {
+            "desc": "Generate hacker text-effect sticker"
+        },
+        "sand": {
+            "desc": "Generate sand text-effect sticker"
+        },
+        "blackpink": {
+            "desc": "Generate Blackpink text-effect sticker"
+        },
+        "glitch": {
+            "desc": "Generate glitch text-effect sticker"
+        },
+        "fire": {
+            "desc": "Generate fire text-effect sticker"
+        },
+        "light": {
+            "desc": "Generate light text-effect sticker"
+        },
+        "purple": {
+            "desc": "Generate purple text-effect sticker"
+        },
+        "impressive": {
+            "desc": "Generate impressive text-effect sticker"
+        },
+        "hug": {
+            "desc": "Send an anime hug reaction"
+        },
+        "pat": {
+            "desc": "Send an anime pat reaction"
+        },
+        "poke": {
+            "desc": "Send an anime poke reaction"
+        },
+        "cry": {
+            "desc": "Send an anime cry reaction"
+        },
+        "wink": {
+            "desc": "Send an anime wink reaction"
+        },
+        "nom": {
+            "desc": "Send an anime nom reaction"
+        },
+        "pies": {
+            "desc": "Country-themed pies sticker"
+        },
+        "china": {
+            "desc": "China-themed sticker"
+        },
+        "japan": {
+            "desc": "Japan-themed sticker"
+        },
+        "korea": {
+            "desc": "Korea-themed sticker"
+        },
+        "india": {
+            "desc": "India-themed sticker"
+        },
+        "indonesia": {
+            "desc": "Indonesia-themed sticker"
+        },
+        "malaysia": {
+            "desc": "Malaysia-themed sticker"
+        },
+        "thailand": {
+            "desc": "Thailand-themed sticker"
+        },
+        "translate": {
+            "desc": "Translate text to another language"
+        },
+        "upscale": {
+            "desc": "Upscale image quality 4x using AI"
+        },
+        "tg": {
+            "desc": "Download a Telegram sticker pack"
+        },
+        "tgsticker": {
+            "desc": "Download a Telegram sticker pack"
+        },
+        "telesticker": {
+            "desc": "Download a Telegram sticker pack"
+        },
+        "stickertelegram": {
+            "desc": "Download a Telegram sticker pack"
+        },
+        "bank": {
+            "desc": "Show your bank balance"
+        },
+        "deposit": {
+            "desc": "Deposit coins from wallet to bank"
+        },
+        "withdraw": {
+            "desc": "Withdraw coins from bank to wallet"
+        },
+        "transfer": {
+            "desc": "Transfer coins to another user"
+        },
+        "give": {
+            "desc": "Give coins to another user (alias of transfer)"
+        },
+        "gamble": {
+            "desc": "Gamble coins (50/50 chance)"
+        },
+        "slot2": {
+            "desc": "Premium slot machine with jackpot"
+        },
+        "lb": {
+            "desc": "Show economy leaderboard (top 10)"
+        },
+        "wallet": {
+            "desc": "Show your wallet balance (alias of money)"
+        },
+        "voice": {
+            "desc": "Convert replied audio to voice note"
+        },
+        "toaudio": {
+            "desc": "Convert video to audio file"
+        },
+        "tomp3": {
+            "desc": "Convert media to MP3 audio"
+        },
+        "tovideo": {
+            "desc": "Convert media to MP4 video"
+        },
+        "tomp4": {
+            "desc": "Convert media to MP4 video"
+        },
+        "sound": {
+            "desc": "Extract sound from a video"
+        },
+        "fliptext": {
+            "desc": "Flip text upside down"
+        },
+        "ttp": {
+            "desc": "Generate text-to-picture sticker"
+        },
+        "tourl": {
+            "desc": "Upload a file and get a public URL"
+        },
+        "paste": {
+            "desc": "Upload text to pastebin and get URL"
+        },
+        "pick": {
+            "desc": "Randomly pick one option from a list"
+        },
+        "tiny": {
+            "desc": "Shorten a long URL"
+        },
+        "num": {
+            "desc": "Look up info about a phone number"
+        },
+        "dbinary": {
+            "desc": "Decode a binary string to text"
+        },
+        "ebinary": {
+            "desc": "Encode text to a binary string"
+        },
+        "comic": {
+            "desc": "Generate comic-style text image"
+        },
+        "cloudsheart": {
+            "desc": "Generate clouds heart text effect"
+        },
+        "nameoncake": {
+            "desc": "Put name on birthday cake image"
+        },
+        "advancedglow": {
+            "desc": "Generate advanced glow text effect"
+        },
+        "custommenu": {
+            "desc": "Show sample custom menu style block"
+        },
+        "readmore": {
+            "desc": "Add a Read More fold to long text"
+        },
+        "age": {
+            "desc": "Calculate age from your birthday"
+        },
+        "checkme": {
+            "desc": "Get random fun user info"
+        },
+        "pincode": {
+            "desc": "Look up an Indian pincode location"
+        },
+        "iban": {
+            "desc": "Generate a sample IBAN number"
+        },
+        "countrycode": {
+            "desc": "Look up country flag and name by code"
+        },
+        "time": {
+            "desc": "Show world time in various timezones"
+        },
+        "quran": {
+            "desc": "Get a Quran verse or surah excerpt"
+        },
+        "dream": {
+            "desc": "AI dream interpretation"
+        },
+        "mock": {
+            "desc": "Convert text to sPoNgEbOb MoCkInG case"
+        },
+        "hack": {
+            "desc": "Fun hacking prank animation"
+        },
+        "shadi": {
+            "desc": "Random marriage between users"
+        },
+        "slap": {
+            "desc": "Send a slap reaction"
+        },
+        "tenor": {
+            "desc": "Send a random Tenor gif"
+        },
+        "wyr": {
+            "desc": "Play Would You Rather"
+        },
+        "note": {
+            "desc": "Save, list, or delete personal notes"
+        },
+        "find": {
+            "desc": "Identify a song from replied audio (Shazam-like)"
+        },
+        "groqplus": {
+            "desc": "Voice transcription using Groq AI"
+        },
+        "downloadall": {
+            "desc": "Universal media downloader"
+        },
+        "gdirect": {
+            "desc": "Download from Google Drive direct link"
+        },
+        "musicdl": {
+            "desc": "Search and download music"
+        },
+        "linux": {
+            "desc": "Run a Linux-style shell command (mock)"
+        },
+        "setcookie": {
+            "desc": "Set Bing cookie for AI features (sudo)"
+        },
+        "cap": {
+            "desc": "Update caption of a replied media"
+        },
+        "qc": {
+            "desc": "Generate quoted-message style sticker"
+        },
+        "cs": {
+            "desc": "Crop a video or gif as sticker"
+        },
+        "rc": {
+            "desc": "Create a rounded-corner sticker"
+        },
+        "rar": {
+            "desc": "Compress or decompress archive files"
+        },
+        "splitvid": {
+            "desc": "Split a video into 30s status chunks"
+        },
+        "sysinfo": {
+            "desc": "Show server system info"
+        },
+        "webscan": {
+            "desc": "Scan a website for metadata"
+        },
+        "virustotal": {
+            "desc": "Check a file hash or URL on VirusTotal"
+        },
+        "antibroadcast": {
+            "desc": "Toggle anti-broadcast message filter"
+        },
+        "antireaction": {
+            "desc": "Toggle anti-reaction emoji filter"
+        },
+        "antishield": {
+            "desc": "Toggle antispam shield protection"
+        },
+        "apresence": {
+            "desc": "Toggle simulated typing/recording presence"
+        },
+        "astatusreact": {
+            "desc": "Toggle auto-react to others statuses"
+        },
+        "teleget": {
+            "desc": "Download a file from Telegram"
+        },
+        "annas": {
+            "desc": "Search books via Annas Archive"
+        },
+        "tempkick": {
+            "desc": "Temporarily kick a user and re-add later"
+        },
+        "fa": {
+            "desc": "Forward text to multiple phone numbers"
+        },
+        "wiki": {
+            "desc": "Search Wikipedia and get article excerpt"
+        },
+        "speedtest": {
+            "desc": "Run an internet speed test"
+        },
+        "selfmention": {
+            "desc": "Mention yourself (the sender)"
+        },
+        "pastpaper": {
+            "desc": "Search and download past exam papers"
+        },
+        "imagegen": {
+            "desc": "Generate an image from a text prompt"
+        },
+        "imageedit": {
+            "desc": "Edit an image with an AI prompt"
+        },
+        "advsend": {
+            "desc": "Send advanced formatted message to a number"
+        },
+        "mathgame": {
+            "desc": "Play interactive math quiz"
+        },
+        "autoforward": {
+            "desc": "Auto-forward all messages to a target JID"
+        },
+        "autoinsta": {
+            "desc": "Auto-download Instagram links posted in chat"
+        },
+        "autostatussender": {
+            "desc": "Auto-send your status to people who reply"
+        },
+        "antistatusmention": {
+            "desc": "Auto-delete group status mention messages"
+        },
+        "stealth": {
+            "desc": "Toggle stealth read (no read receipts)"
+        },
+        "statussaver": {
+            "desc": "Save a replied WhatsApp status"
+        },
+        "groupsnap": {
+            "desc": "Create, restore, list, or delete group snapshots"
+        },
+        "fd": {
+            "desc": "Custom forward replied message to multiple JIDs"
+        },
+        "animation": {
+            "desc": "Animate text via message edits"
+        },
+        "astatus": {
+            "desc": "Auto-send status reply"
+        },
+        "couplepp": {
+            "desc": "Generate couple profile picture"
+        },
+        "xvideo": {
+            "desc": "NSFW video downloader (hidden from menu)"
+        }
+    }
+}

@@ -1,0 +1,211 @@
+/**
+ * Titan MD session generator — web service.
+ *
+ * Mirrors scripts/getSession.js as a deployable Express + SSE server.
+ * Each visitor gets an isolated tmp session dir; once Baileys reports
+ * `connection.open`, the encoded SESSION_ID is streamed back over SSE.
+ *
+ * Run locally:   npm run web
+ * Deploy:        any Node host (Render web service, Koyeb web, Railway, VPS+pm2).
+ *
+ * Routes:
+ *   GET  /                        — UI
+ *   POST /api/session/start       — body: {method:'qr'|'pair', phone?:string}
+ *                                   returns: {sessionId}
+ *   GET  /api/session/:id/events  — SSE stream of status updates
+ *   POST /api/session/:id/cancel  — abort an in-progress session
+ */
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+const PORT = parseInt(process.env.PORT || '3000', 10);
+const TMP_ROOT = path.join(__dirname, '.tmp-sessions');
+const SESSION_TTL_MS = 5 * 60 * 1000; // 5 min — abort if not paired
+
+try { fs.mkdirSync(TMP_ROOT, { recursive: true }); } catch (_) {}
+
+const app = express();
+app.use(express.json({ limit: '256kb' }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// In-memory registry of active pairings.
+// sessionId -> { sock, status, qr, pairCode, sessionString, error, sseClients[], tmpDir, createdAt }
+const sessions = new Map();
+
+function pushEvent(session, payload) {
+  for (const res of session.sseClients) {
+    try { res.write(`data: ${JSON.stringify(payload)}\n\n`); } catch (_) {}
+  }
+}
+
+function setStatus(session, status, extra = {}) {
+  session.status = status;
+  Object.assign(session, extra);
+  pushEvent(session, { status, ...extra });
+}
+
+async function teardown(session, delayMs = 0) {
+  setTimeout(() => {
+    try { session.sock && session.sock.ws && session.sock.ws.close(); } catch (_) {}
+    try { fs.rmSync(session.tmpDir, { recursive: true, force: true }); } catch (_) {}
+    // close all SSE clients
+    for (const res of session.sseClients) { try { res.end(); } catch (_) {} }
+    sessions.delete(session.sessionId);
+  }, delayMs);
+}
+
+app.post('/api/session/start', async (req, res) => {
+  const { method, phone } = req.body || {};
+  if (method !== 'qr' && method !== 'pair') {
+    return res.status(400).json({ error: 'method must be "qr" or "pair"' });
+  }
+  if (method === 'pair' && !phone) {
+    return res.status(400).json({ error: 'phone required for pair method' });
+  }
+
+  let baileys;
+  try { baileys = require('@whiskeysockets/baileys'); }
+  catch (e) { return res.status(500).json({ error: 'baileys not installed; run npm install' }); }
+  const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = baileys;
+
+  const sessionId = crypto.randomBytes(16).toString('hex');
+  const tmpDir = path.join(TMP_ROOT, sessionId);
+  fs.mkdirSync(tmpDir, { recursive: true });
+
+  const { state, saveCreds } = await useMultiFileAuthState(tmpDir);
+
+  const sock = makeWASocket({
+    auth: state,
+    printQRInTerminal: false,
+    browser: ['Titan MD', 'Chrome', '1.0.0'],
+  });
+
+  const session = {
+    sessionId,
+    method,
+    phone: phone ? String(phone).replace(/\D/g, '') : null,
+    sock,
+    tmpDir,
+    sseClients: [],
+    status: 'starting',
+    qr: null,
+    pairCode: null,
+    sessionString: null,
+    error: null,
+    createdAt: Date.now(),
+  };
+  sessions.set(sessionId, session);
+
+  sock.ev.on('creds.update', saveCreds);
+
+  sock.ev.on('connection.update', async (update) => {
+    if (update.qr && method === 'qr' && !session.sessionString) {
+      setStatus(session, 'qr_ready', { qr: update.qr });
+    }
+    if (update.connection === 'open') {
+      // Give saveCreds a moment to flush.
+      setTimeout(() => {
+        const credsPath = path.join(tmpDir, 'creds.json');
+        if (!fs.existsSync(credsPath)) {
+          setStatus(session, 'error', { error: 'creds.json was not produced' });
+          teardown(session, 1000);
+          return;
+        }
+        const json = fs.readFileSync(credsPath, 'utf8');
+        const b64 = Buffer.from(json).toString('base64');
+        const sessionString = 'TITAN~' + b64;
+        setStatus(session, 'success', { sessionString });
+        teardown(session, 30 * 1000); // 30s grace window
+      }, 800);
+    }
+    if (update.connection === 'close') {
+      const code = update.lastDisconnect?.error?.output?.statusCode;
+      const reason = update.lastDisconnect?.error?.message || `code ${code}`;
+      // If we already succeeded, the close is just the cleanup — ignore.
+      if (session.status === 'success') return;
+      if (code === DisconnectReason?.loggedOut) {
+        setStatus(session, 'error', { error: 'Logged out before pairing completed.' });
+      } else {
+        setStatus(session, 'error', { error: 'Connection closed: ' + reason });
+      }
+      teardown(session, 1000);
+    }
+  });
+
+  if (method === 'pair') {
+    // Defer pair-code request until WS handshake finishes.
+    setTimeout(async () => {
+      if (sessions.get(sessionId)?.status === 'success') return; // already done somehow
+      try {
+        const code = await sock.requestPairingCode(session.phone);
+        // Format with dash in the middle: ABCD-EFGH
+        const formatted = code.length === 8 ? `${code.slice(0,4)}-${code.slice(4)}` : code;
+        setStatus(session, 'pair_ready', { pairCode: formatted });
+      } catch (e) {
+        setStatus(session, 'error', { error: 'Pair-code request failed: ' + e.message });
+        teardown(session, 2000);
+      }
+    }, 2500);
+  }
+
+  // TTL — abandon if not paired in 5 min
+  setTimeout(() => {
+    if (sessions.has(sessionId) && session.status !== 'success') {
+      setStatus(session, 'error', { error: 'Pairing timed out (5 min).' });
+      teardown(session, 1000);
+    }
+  }, SESSION_TTL_MS);
+
+  res.json({ sessionId });
+});
+
+app.get('/api/session/:id/events', (req, res) => {
+  const session = sessions.get(req.params.id);
+  if (!session) {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ error: 'session not found' }));
+  }
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+  res.write('\n');
+  session.sseClients.push(res);
+
+  // Send current state immediately
+  const snapshot = {
+    status: session.status,
+    qr: session.qr,
+    pairCode: session.pairCode,
+    sessionString: session.sessionString,
+    error: session.error,
+  };
+  res.write(`data: ${JSON.stringify(snapshot)}\n\n`);
+
+  // Heartbeat to keep proxies from killing the stream
+  const hb = setInterval(() => {
+    try { res.write(':heartbeat\n\n'); } catch (_) {}
+  }, 20000);
+
+  req.on('close', () => {
+    clearInterval(hb);
+    session.sseClients = session.sseClients.filter((c) => c !== res);
+  });
+});
+
+app.post('/api/session/:id/cancel', (req, res) => {
+  const session = sessions.get(req.params.id);
+  if (!session) return res.status(404).json({ error: 'session not found' });
+  teardown(session, 100);
+  res.json({ ok: true });
+});
+
+app.get('/healthz', (_req, res) => res.json({ ok: true, sessions: sessions.size, uptime: process.uptime() }));
+
+app.listen(PORT, () => {
+  console.log(`[titan-md-web] session generator listening on :${PORT}`);
+});

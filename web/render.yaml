@@ -1,0 +1,19 @@
+# render.yaml — Render.com blueprint for deploying the session generator
+# as a web service. Place this at the repo root if you want one-click deploy,
+# or use Render's UI to create the service manually.
+#
+# Deploy:  https://render.com/deploy?repo=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot
+services:
+  - type: web
+    name: titan-md-session
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm run web
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 10000
+    healthCheckPath: /healthz
