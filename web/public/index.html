@@ -374,6 +374,59 @@
   }
   .nav-back:hover { color: var(--accent); }
 
+  /* Custom Session ID toggle */
+  .opt-toggle {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .opt-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .opt-row input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .opt-row .checkmark {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-0);
+    position: relative;
+    transition: all 0.15s;
+    margin-top: 1px;
+  }
+  .opt-row:hover .checkmark { border-color: var(--accent); }
+  .opt-row input[type="checkbox"]:checked + .checkmark {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .opt-row input[type="checkbox"]:checked + .checkmark::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 6px;
+    height: 11px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .opt-label strong { display: block; font-size: 14px; color: var(--text); }
+  .opt-label small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+  .opt-label small code { background: var(--bg-0); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+  #opt-custom-id-input input { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+
   @keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes bounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
@@ -433,6 +486,22 @@
       <button class="nav-back" data-back-home>← Back</button>
       <h2>How do you want to pair?</h2>
       <p class="sub">Both methods produce the same <code>SESSION_ID</code>. Pick whichever is easier.</p>
+
+      <!-- Custom Session ID toggle -->
+      <div class="opt-toggle">
+        <label class="opt-row">
+          <input type="checkbox" id="opt-custom-id" />
+          <span class="checkmark"></span>
+          <span class="opt-label">
+            <strong>Use Custom Session ID</strong>
+            <small>Choose your own ID (e.g. <code>mybot</code>) instead of a random one.</small>
+          </span>
+        </label>
+        <div id="opt-custom-id-input" style="display:none;margin-top:10px;">
+          <input id="custom-id" type="text" placeholder="mybot" pattern="[a-zA-Z0-9_-]{3,32}" autocomplete="off" />
+          <p class="hint">3–32 characters · letters, numbers, <code>_</code>, <code>-</code> only. Must not be already taken.</p>
+        </div>
+      </div>
 
       <button class="choice" data-method="pair">
         <span class="icon">🔢</span>
@@ -566,9 +635,34 @@ document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click'
 document.querySelectorAll('[data-back-home]').forEach(b => b.addEventListener('click', goHome));
 document.getElementById('btn-start').addEventListener('click', () => show('step-choose'));
 
+// Custom Session ID toggle
+const optCustomId = document.getElementById('opt-custom-id');
+const optCustomIdInput = document.getElementById('opt-custom-id-input');
+optCustomId.addEventListener('change', () => {
+  optCustomIdInput.style.display = optCustomId.checked ? 'block' : 'none';
+  if (optCustomId.checked) document.getElementById('custom-id').focus();
+});
+
+function getCustomId() {
+  if (!optCustomId.checked) return null;
+  const v = (document.getElementById('custom-id').value || '').trim();
+  return v || null;
+}
+
+function validateCustomId(v) {
+  if (!v) return 'Please enter a custom ID or uncheck the option.';
+  if (!/^[a-zA-Z0-9_-]{3,32}$/.test(v)) return 'ID must be 3–32 chars (letters, numbers, _ or -).';
+  return null;
+}
+
 document.querySelectorAll('.choice').forEach(btn => {
   btn.addEventListener('click', () => {
     const method = btn.dataset.method;
+    if (optCustomId.checked) {
+      const v = (document.getElementById('custom-id').value || '').trim();
+      const err = validateCustomId(v);
+      if (err) { alert(err); return; }
+    }
     if (method === 'pair') show('step-pair-input');
     else if (method === 'qr') startSession('qr');
   });
@@ -612,6 +706,8 @@ async function startSession(method, phone) {
   try {
     const body = { method };
     if (phone) body.phone = phone;
+    const customId = getCustomId();
+    if (customId) body.customId = customId;
     const r = await fetch('/api/session/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

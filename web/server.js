@@ -132,10 +132,9 @@ async function startSocket(session) {
           return;
         }
         const json = fs.readFileSync(credsPath, 'utf8');
-        // Save full creds keyed by a short random ID. The SESSION_ID we hand
-        // to the user is just `TITAN~<id>` — 22 chars total instead of ~1500.
-        // The bot fetches the full creds from /api/session/fetch/:id on boot.
-        const shortId = crypto.randomBytes(8).toString('hex'); // 16 hex chars = 64 bits
+        // Save full creds keyed by either the user-chosen custom ID or a
+        // random 16-hex ID. SESSION_ID handed back is "TITAN~<id>".
+        const shortId = session.customId || crypto.randomBytes(8).toString('hex');
         try { fs.writeFileSync(path.join(STORE_ROOT, shortId + '.json'), json, 'utf8'); }
         catch (e) { console.warn('failed to persist creds:', e.message); }
         const sessionString = 'TITAN~' + shortId;
@@ -226,13 +225,30 @@ async function startSocket(session) {
   return sock;
 }
 
+// Custom IDs: 3-32 chars, letters/digits/underscore/hyphen. Random IDs: 16 hex.
+const CUSTOM_ID_RE = /^[a-zA-Z0-9_-]{3,32}$/;
+const FETCH_ID_RE  = /^[a-zA-Z0-9_-]{3,32}$/; // matches both custom + random
+
 app.post('/api/session/start', async (req, res) => {
-  const { method, phone } = req.body || {};
+  const { method, phone, customId } = req.body || {};
   if (method !== 'qr' && method !== 'pair') {
     return res.status(400).json({ error: 'method must be "qr" or "pair"' });
   }
   if (method === 'pair' && !phone) {
     return res.status(400).json({ error: 'phone required for pair method' });
+  }
+
+  // Validate + reserve custom ID up-front. If it's already taken, fail fast.
+  let storeId = null;
+  if (customId !== undefined && customId !== null && customId !== '') {
+    if (!CUSTOM_ID_RE.test(String(customId))) {
+      return res.status(400).json({ error: 'custom ID must be 3-32 chars: letters, digits, _ or -' });
+    }
+    const existing = path.join(STORE_ROOT, customId + '.json');
+    if (fs.existsSync(existing)) {
+      return res.status(409).json({ error: 'that custom ID is already taken — pick a different one' });
+    }
+    storeId = String(customId);
   }
 
   try { require('@whiskeysockets/baileys'); }
@@ -246,6 +262,7 @@ app.post('/api/session/start', async (req, res) => {
     sessionId,
     method,
     phone: phone ? String(phone).replace(/\D/g, '') : null,
+    customId: storeId, // null = use random hex id, otherwise the user's chosen name
     sock: null,
     tmpDir,
     sseClients: [],
@@ -317,17 +334,16 @@ app.post('/api/session/:id/cancel', (req, res) => {
 });
 
 // Endpoint the bot calls on boot to materialize creds.json from the short ID.
-// Returns the raw creds JSON. ID must match 16-hex-char pattern (anti-scan).
+// Accepts either a random hex ID or a user-chosen custom ID.
 app.get('/api/session/fetch/:id', (req, res) => {
   const id = String(req.params.id || '');
-  if (!/^[0-9a-f]{16}$/.test(id)) {
+  if (!FETCH_ID_RE.test(id)) {
     return res.status(400).json({ error: 'invalid id format' });
   }
   const file = path.join(STORE_ROOT, id + '.json');
   if (!fs.existsSync(file)) {
     return res.status(404).json({ error: 'session not found or expired (>7 days old)' });
   }
-  // Refresh mtime so frequent users keep theirs alive
   try { fs.utimesSync(file, new Date(), new Date()); } catch (_) {}
   res.setHeader('Content-Type', 'application/json');
   res.sendFile(file);
