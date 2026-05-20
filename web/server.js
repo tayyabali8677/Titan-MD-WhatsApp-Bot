@@ -84,16 +84,16 @@ app.post('/api/session/start', async (req, res) => {
     waVersion = v.version;
   } catch (_) { /* fall back to baileys default */ }
 
+  // NB: keep this config minimal — extra options (markOnlineOnConnect: false,
+  // syncFullHistory: false, custom timeouts) have been observed to interfere
+  // with the pair-code handshake. Match the reference impls (Safari fingerprint,
+  // defaults for everything else).
   const sock = makeWASocket({
     version: waVersion,
     auth: state,
     printQRInTerminal: false,
-    browser: Browsers ? Browsers.ubuntu('Chrome') : ['Titan MD', 'Chrome', '1.0.0'],
-    syncFullHistory: false,
-    markOnlineOnConnect: false,
-    generateHighQualityLinkPreview: false,
-    connectTimeoutMs: 60_000,
-    keepAliveIntervalMs: 30_000,
+    browser: Browsers ? Browsers.macOS('Safari') : ['Mac OS', 'Safari', '17.0'],
+    logger: { level: 'silent', child: () => ({ level: 'silent', child: () => ({}), trace(){}, debug(){}, info(){}, warn(){}, error(){}, fatal(){} }), trace(){}, debug(){}, info(){}, warn(){}, error(){}, fatal(){} },
   });
 
   const session = {
@@ -184,19 +184,23 @@ app.post('/api/session/start', async (req, res) => {
   });
 
   if (method === 'pair') {
-    // Defer pair-code request until WS handshake finishes.
+    // Defer pair-code request until WS handshake finishes. Standard guard:
+    // only request if creds aren't already registered.
     setTimeout(async () => {
-      if (sessions.get(sessionId)?.status === 'success') return; // already done somehow
+      if (sessions.get(sessionId)?.status === 'success') return;
+      if (sock.authState?.creds?.registered) return; // already paired somehow
       try {
         const code = await sock.requestPairingCode(session.phone);
-        // Format with dash in the middle: ABCD-EFGH
+        // Display with hyphen for readability; the hyphen is purely visual.
+        // WhatsApp's "Link with phone number" input accepts the code with or
+        // without the hyphen.
         const formatted = code.length === 8 ? `${code.slice(0,4)}-${code.slice(4)}` : code;
-        setStatus(session, 'pair_ready', { pairCode: formatted });
+        setStatus(session, 'pair_ready', { pairCode: formatted, rawCode: code });
       } catch (e) {
         setStatus(session, 'error', { error: 'Pair-code request failed: ' + e.message });
         teardown(session, 2000);
       }
-    }, 2500);
+    }, 3000);
   }
 
   // TTL — abandon if not paired in 5 min

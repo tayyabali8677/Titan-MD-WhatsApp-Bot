@@ -475,7 +475,8 @@
       <h2>Scan this QR</h2>
       <p class="sub">Open WhatsApp → Settings → <strong>Linked Devices</strong> → Link a device.</p>
       <div id="qr-canvas-wrap">
-        <canvas id="qr-canvas"></canvas>
+        <canvas id="qr-canvas" width="240" height="240"></canvas>
+        <img id="qr-img" alt="QR code" style="display:none;width:240px;height:240px;" />
       </div>
       <div class="status info">
         <div class="spinner"><span></span><span></span><span></span></div>
@@ -641,8 +642,34 @@ function listen(sessionId, method) {
 
     if (data.status === 'qr_ready' && data.qr) {
       const canvas = document.getElementById('qr-canvas');
-      QRCode.toCanvas(canvas, data.qr, { width: 240, margin: 0, color: { dark: '#0a0a0f', light: '#ffffff' } });
-      document.getElementById('qr-status-text').textContent = 'Waiting for scan...';
+      const img = document.getElementById('qr-img');
+      const status = document.getElementById('qr-status-text');
+      // Primary: render via qrcode.js. If anything goes wrong (CDN blocked,
+      // payload too big, library missing) fall back to an external QR API
+      // so the user is never stuck staring at a blank canvas.
+      let rendered = false;
+      try {
+        if (typeof QRCode !== 'undefined' && QRCode.toCanvas) {
+          QRCode.toCanvas(canvas, data.qr, { width: 240, margin: 1, errorCorrectionLevel: 'L', color: { dark: '#0a0a0f', light: '#ffffff' } }, (err) => {
+            if (err) {
+              console.warn('qrcode.js render failed:', err.message);
+            } else {
+              rendered = true;
+              canvas.style.display = 'block';
+              img.style.display = 'none';
+            }
+          });
+        }
+      } catch (e) { console.warn('qrcode.js threw:', e.message); }
+      // Fallback after a short delay so the qrcode.js callback has a chance.
+      setTimeout(() => {
+        if (!rendered) {
+          img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=' + encodeURIComponent(data.qr);
+          img.style.display = 'block';
+          canvas.style.display = 'none';
+        }
+      }, 600);
+      status.textContent = 'Waiting for scan...';
     }
     if (data.status === 'pair_ready' && data.pairCode) {
       document.getElementById('pair-code-display').textContent = data.pairCode;
