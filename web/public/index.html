@@ -674,6 +674,12 @@ function listen(sessionId, method) {
     if (data.status === 'pair_ready' && data.pairCode) {
       document.getElementById('pair-code-display').textContent = data.pairCode;
     }
+    if (data.status === 'finalizing') {
+      const qrStatus = document.getElementById('qr-status-text');
+      const pairStatus = document.getElementById('pair-status-text');
+      if (qrStatus) qrStatus.textContent = 'Linked! Finalizing...';
+      if (pairStatus) pairStatus.textContent = 'Code accepted! Finalizing...';
+    }
     if (data.status === 'success' && data.sessionString) {
       es.close();
       currentEventSource = null;

@@ -30,8 +30,18 @@ const app = express();
 app.use(express.json({ limit: '256kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Pino-shaped no-op logger so Baileys never crashes calling `logger.child(...)`.
+function silentLogger() {
+  const noop = () => {};
+  const lg = {
+    level: 'silent',
+    trace: noop, debug: noop, info: noop, warn: noop, error: noop, fatal: noop,
+    child: () => silentLogger(),
+  };
+  return lg;
+}
+
 // In-memory registry of active pairings.
-// sessionId -> { sock, status, qr, pairCode, sessionString, error, sseClients[], tmpDir, createdAt }
 const sessions = new Map();
 
 function pushEvent(session, payload) {
@@ -47,93 +57,66 @@ function setStatus(session, status, extra = {}) {
 }
 
 async function teardown(session, delayMs = 0) {
+  if (session._tornDown) return;
+  session._tornDown = true;
   setTimeout(() => {
     try { session.sock && session.sock.ws && session.sock.ws.close(); } catch (_) {}
     try { fs.rmSync(session.tmpDir, { recursive: true, force: true }); } catch (_) {}
-    // close all SSE clients
     for (const res of session.sseClients) { try { res.end(); } catch (_) {} }
     sessions.delete(session.sessionId);
   }, delayMs);
 }
 
-app.post('/api/session/start', async (req, res) => {
-  const { method, phone } = req.body || {};
-  if (method !== 'qr' && method !== 'pair') {
-    return res.status(400).json({ error: 'method must be "qr" or "pair"' });
-  }
-  if (method === 'pair' && !phone) {
-    return res.status(400).json({ error: 'phone required for pair method' });
-  }
-
-  let baileys;
-  try { baileys = require('@whiskeysockets/baileys'); }
-  catch (e) { return res.status(500).json({ error: 'baileys not installed; run npm install' }); }
+/**
+ * Boot (or re-boot) a Baileys socket for a session.
+ * Called once on POST /api/session/start, and again every time WA tells us
+ * to restart (DisconnectReason.restartRequired = 515 — which fires AFTER a
+ * successful pair/QR scan and is the signal that we should re-handshake
+ * with the new creds).
+ */
+async function startSocket(session) {
+  const baileys = require('@whiskeysockets/baileys');
   const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, Browsers } = baileys;
 
-  const sessionId = crypto.randomBytes(16).toString('hex');
-  const tmpDir = path.join(TMP_ROOT, sessionId);
-  fs.mkdirSync(tmpDir, { recursive: true });
-
-  const { state, saveCreds } = await useMultiFileAuthState(tmpDir);
-
-  // Fetch current WhatsApp Web protocol version — without this, an older
-  // hard-coded version triggers "Connection Failure" the moment WA bumps protocol.
+  // Fetch current WA Web protocol version. Falls back to baileys default.
   let waVersion;
-  try {
-    const v = await fetchLatestBaileysVersion();
-    waVersion = v.version;
-  } catch (_) { /* fall back to baileys default */ }
+  try { waVersion = (await fetchLatestBaileysVersion()).version; } catch (_) {}
 
-  // NB: keep this config minimal — extra options (markOnlineOnConnect: false,
-  // syncFullHistory: false, custom timeouts) have been observed to interfere
-  // with the pair-code handshake. Match the reference impls (Safari fingerprint,
-  // defaults for everything else).
+  const { state, saveCreds } = await useMultiFileAuthState(session.tmpDir);
+
   const sock = makeWASocket({
     version: waVersion,
     auth: state,
     printQRInTerminal: false,
     browser: Browsers ? Browsers.macOS('Safari') : ['Mac OS', 'Safari', '17.0'],
-    logger: { level: 'silent', child: () => ({ level: 'silent', child: () => ({}), trace(){}, debug(){}, info(){}, warn(){}, error(){}, fatal(){} }), trace(){}, debug(){}, info(){}, warn(){}, error(){}, fatal(){} },
+    logger: silentLogger(),
+    markOnlineOnConnect: false,
   });
-
-  const session = {
-    sessionId,
-    method,
-    phone: phone ? String(phone).replace(/\D/g, '') : null,
-    sock,
-    tmpDir,
-    sseClients: [],
-    status: 'starting',
-    qr: null,
-    pairCode: null,
-    sessionString: null,
-    error: null,
-    createdAt: Date.now(),
-  };
-  sessions.set(sessionId, session);
+  session.sock = sock;
 
   sock.ev.on('creds.update', saveCreds);
 
   sock.ev.on('connection.update', async (update) => {
-    if (update.qr && method === 'qr' && !session.sessionString) {
+    // QR push
+    if (update.qr && session.method === 'qr' && !session.sessionString) {
       setStatus(session, 'qr_ready', { qr: update.qr });
     }
+
     if (update.connection === 'open') {
-      // Give saveCreds a moment to flush.
+      // Success!  Wait for saveCreds to flush, then encode + deliver.
       setTimeout(async () => {
-        const credsPath = path.join(tmpDir, 'creds.json');
+        if (session.status === 'success') return; // guard against duplicate fires
+        const credsPath = path.join(session.tmpDir, 'creds.json');
         if (!fs.existsSync(credsPath)) {
           setStatus(session, 'error', { error: 'creds.json was not produced' });
           teardown(session, 1000);
           return;
         }
         const json = fs.readFileSync(credsPath, 'utf8');
-        const b64 = Buffer.from(json).toString('base64');
-        const sessionString = 'TITAN~' + b64;
+        const sessionString = 'TITAN~' + Buffer.from(json).toString('base64');
         setStatus(session, 'success', { sessionString });
 
-        // Also DM the SESSION_ID to the user's own WhatsApp number as a backup,
-        // so they never lose it even if they close the browser.
+        // Best-effort: DM the SESSION_ID to the user's own WA as a backup.
         try {
           const ownerJid = sock?.user?.id;
           if (ownerJid) {
@@ -148,25 +131,41 @@ app.post('/api/session/start', async (req, res) => {
           }
         } catch (_) { /* DM is best-effort */ }
 
-        teardown(session, 30 * 1000); // 30s grace window
-      }, 800);
+        teardown(session, 30 * 1000);
+      }, 1000);
     }
+
     if (update.connection === 'close') {
+      if (session.status === 'success' || session._tornDown) return;
+
       const code = update.lastDisconnect?.error?.output?.statusCode;
       const reason = update.lastDisconnect?.error?.message || `code ${code}`;
-      // If we already succeeded, the close is just the cleanup — ignore.
-      if (session.status === 'success') return;
 
-      // Some Baileys disconnect codes are transient — the socket reconnects on
-      // its own. Don't bubble those to the user as errors; just keep waiting.
-      const transient = new Set([
-        DisconnectReason?.connectionClosed,
-        DisconnectReason?.connectionLost,
-        DisconnectReason?.restartRequired,
-        DisconnectReason?.timedOut,
-      ].filter(Boolean));
-      if (transient.has(code)) {
-        // Baileys will reconnect automatically — keep the session alive.
+      // 515 (restartRequired) fires AFTER a successful pair/QR scan.
+      // Baileys does NOT auto-reconnect on this code — we must re-create the
+      // socket using the now-saved creds, which will then fire `connection:open`
+      // and complete the flow. THIS is the fix for "QR/pair worked but bot
+      // never returned the SESSION_ID".
+      if (code === DisconnectReason?.restartRequired) {
+        if (session._restartCount >= 3) {
+          setStatus(session, 'error', { error: 'Restart loop — aborting.' });
+          teardown(session, 1000);
+          return;
+        }
+        session._restartCount = (session._restartCount || 0) + 1;
+        // Tell the UI we're finishing up.
+        setStatus(session, 'finalizing');
+        try { await startSocket(session); } catch (e) {
+          setStatus(session, 'error', { error: 'Restart failed: ' + e.message });
+          teardown(session, 1000);
+        }
+        return;
+      }
+
+      // Other transient codes — Baileys auto-reconnects, do nothing.
+      if (code === DisconnectReason?.connectionClosed ||
+          code === DisconnectReason?.connectionLost ||
+          code === DisconnectReason?.timedOut) {
         return;
       }
 
@@ -175,7 +174,7 @@ app.post('/api/session/start', async (req, res) => {
       } else if (code === DisconnectReason?.badSession) {
         setStatus(session, 'error', { error: 'Bad session — please restart pairing.' });
       } else if (code === DisconnectReason?.connectionReplaced) {
-        setStatus(session, 'error', { error: 'Connection replaced — another session took over.' });
+        setStatus(session, 'error', { error: 'Another device replaced this session.' });
       } else {
         setStatus(session, 'error', { error: 'Connection closed: ' + reason });
       }
@@ -183,17 +182,13 @@ app.post('/api/session/start', async (req, res) => {
     }
   });
 
-  if (method === 'pair') {
-    // Defer pair-code request until WS handshake finishes. Standard guard:
-    // only request if creds aren't already registered.
+  // Pair-code: only on the first socket boot, only if not already registered.
+  if (session.method === 'pair' && !sock.authState?.creds?.registered && !session.pairCode) {
     setTimeout(async () => {
-      if (sessions.get(sessionId)?.status === 'success') return;
-      if (sock.authState?.creds?.registered) return; // already paired somehow
+      if (session.status === 'success' || session._tornDown) return;
+      if (sock.authState?.creds?.registered) return;
       try {
         const code = await sock.requestPairingCode(session.phone);
-        // Display with hyphen for readability; the hyphen is purely visual.
-        // WhatsApp's "Link with phone number" input accepts the code with or
-        // without the hyphen.
         const formatted = code.length === 8 ? `${code.slice(0,4)}-${code.slice(4)}` : code;
         setStatus(session, 'pair_ready', { pairCode: formatted, rawCode: code });
       } catch (e) {
@@ -201,6 +196,48 @@ app.post('/api/session/start', async (req, res) => {
         teardown(session, 2000);
       }
     }, 3000);
+  }
+
+  return sock;
+}
+
+app.post('/api/session/start', async (req, res) => {
+  const { method, phone } = req.body || {};
+  if (method !== 'qr' && method !== 'pair') {
+    return res.status(400).json({ error: 'method must be "qr" or "pair"' });
+  }
+  if (method === 'pair' && !phone) {
+    return res.status(400).json({ error: 'phone required for pair method' });
+  }
+
+  try { require('@whiskeysockets/baileys'); }
+  catch (e) { return res.status(500).json({ error: 'baileys not installed; run npm install' }); }
+
+  const sessionId = crypto.randomBytes(16).toString('hex');
+  const tmpDir = path.join(TMP_ROOT, sessionId);
+  fs.mkdirSync(tmpDir, { recursive: true });
+
+  const session = {
+    sessionId,
+    method,
+    phone: phone ? String(phone).replace(/\D/g, '') : null,
+    sock: null,
+    tmpDir,
+    sseClients: [],
+    status: 'starting',
+    qr: null,
+    pairCode: null,
+    sessionString: null,
+    error: null,
+    createdAt: Date.now(),
+    _restartCount: 0,
+    _tornDown: false,
+  };
+  sessions.set(sessionId, session);
+
+  try { await startSocket(session); }
+  catch (e) {
+    return res.status(500).json({ error: 'failed to start socket: ' + e.message });
   }
 
   // TTL — abandon if not paired in 5 min
@@ -229,17 +266,14 @@ app.get('/api/session/:id/events', (req, res) => {
   res.write('\n');
   session.sseClients.push(res);
 
-  // Send current state immediately
-  const snapshot = {
+  res.write(`data: ${JSON.stringify({
     status: session.status,
     qr: session.qr,
     pairCode: session.pairCode,
     sessionString: session.sessionString,
     error: session.error,
-  };
-  res.write(`data: ${JSON.stringify(snapshot)}\n\n`);
+  })}\n\n`);
 
-  // Heartbeat to keep proxies from killing the stream
   const hb = setInterval(() => {
     try { res.write(':heartbeat\n\n'); } catch (_) {}
   }, 20000);

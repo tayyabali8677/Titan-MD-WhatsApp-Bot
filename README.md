@@ -146,44 +146,17 @@ After forking, your copy lives at `https://github.com/<YOUR-USERNAME>/Titan-MD-W
 
 ### 🔑 Step 2 — Generate your SESSION_ID
 
-Pick the method that fits your setup:
+👉 **Visit [titan-md-session.onrender.com](https://titan-md-session.onrender.com/)** and click the big **Generate SESSION_ID →** button.
 
-<table>
-<tr><td width="50%">
+<p align="center">
+  <a href="https://titan-md-session.onrender.com/"><img src="https://img.shields.io/badge/🚀%20Generate%20SESSION__ID-titan--md--session.onrender.com-7c5cff?style=for-the-badge" alt="Get SESSION_ID" /></a>
+</p>
 
-#### 🌐 Hosted web UI *(easiest)*
-
-Deploy your own session generator once and reuse it whenever you need a fresh `SESSION_ID`:
-
-<a href="https://render.com/deploy?repo=https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot"><img src="https://img.shields.io/badge/Deploy%20Session%20Site-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" /></a>
-
-1. Click **Deploy to Render** above → sign in → accept defaults.
-2. Wait ~2 min for the build to finish.
-3. Open the live URL → pick **Pairing Code** or **QR Code**.
-4. Once your phone is linked, the `TITAN~...` string appears on screen *and* is also sent to your WhatsApp as a backup.
-
-</td><td>
-
-#### 💻 Terminal *(developer-friendly)*
-
-```bash
-git clone https://github.com/<YOUR-USERNAME>/Titan-MD-WhatsApp-Bot.git
-cd Titan-MD-WhatsApp-Bot
-npm install
-
-# Pairing code (headless / VPS friendly)
-npm run session:pair 923001234567
-
-# Or QR code (terminal must be visible)
-npm run session
-```
-
-Both methods print a `TITAN~...` string to the terminal.
-
-</td></tr>
-</table>
+Pick **Pairing Code** *(type an 8-char code into WhatsApp)* or **QR Code** *(scan with your phone)*. Both methods produce the same `TITAN~...` string, which appears on the page **and** is sent to your own WhatsApp number as a backup.
 
 > ⚠️ **Treat `SESSION_ID` like a password.** Anyone with it controls your WhatsApp account. Never commit it to git, never paste it in chats, never share screenshots of the full string.
+>
+> 💡 *First visit may take ~30s while the free-tier host wakes up. Subsequent visits are instant.*
 
 ---
 
