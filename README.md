@@ -169,31 +169,36 @@ Pick **one** platform below. All deploy buttons reference this repo; replace `ta
 
 <a href="https://bot-hosting.net/?aff=741025541716574350"><img src="https://img.shields.io/badge/Sign%20up%20on-Bot--Hosting.net-7c5cff?style=for-the-badge&logo=node.js&logoColor=white" alt="Sign up on Bot-Hosting.net" /></a>
 
-A *Panel* is a web dashboard (Pterodactyl-based) that gives you a Node.js server container with a console, file manager, and env-var editor. **No credit card, no sleep timer, free Node.js plan with no expiry** — the best free option for an MD bot.
+A *Panel* is a web dashboard (Pterodactyl-based) that gives you a Node.js server container with a file manager and env-var editor. **No credit card, no sleep timer, free Node.js plan with no expiry** — the best free option for an MD bot.
+
+> 🛈 Panels don't let you run arbitrary shell commands. Instead, you upload **one** bootstrap `index.js` and the panel runs it. The bootstrap clones the repo + installs deps + starts the bot on its own.
 
 **Step-by-step on [Bot-Hosting.net](https://bot-hosting.net/?aff=741025541716574350):**
 
-1. **Sign up** at [bot-hosting.net](https://bot-hosting.net/?aff=741025541716574350) (Discord OAuth, takes ~10 seconds).
+1. **Sign up** at [bot-hosting.net](https://bot-hosting.net/?aff=741025541716574350) (Discord OAuth, ~10 seconds).
 2. Click **Create Server** → pick the **Node.js** egg → name it (e.g. `titan-md`) → **Create**.
 3. Wait ~30 sec for the container to provision. Open it.
-4. Click the **Console** tab and paste:
-   ```bash
-   git clone https://github.com/tayyabali8677/Titan-MD-WhatsApp-Bot.git .
-   npm install
+4. **Download one of the bootstrap files** from this repo:
+   - <a href="https://raw.githubusercontent.com/tayyabali8677/Titan-MD-WhatsApp-Bot/master/panel/index-node.js"><img src="https://img.shields.io/badge/Download-index--node.js-339933?style=flat-square&logo=node.js&logoColor=white" alt="Download index-node.js" /></a> &nbsp; ← *use this if unsure*
+   - <a href="https://raw.githubusercontent.com/tayyabali8677/Titan-MD-WhatsApp-Bot/master/panel/index-pm2.js"><img src="https://img.shields.io/badge/Download-index--pm2.js-2B037A?style=flat-square&logo=pm2&logoColor=white" alt="Download index-pm2.js" /></a> &nbsp; ← *use this if your panel has PM2*
+5. **Open the file in any text editor** and change this line:
+   ```js
+   const SESSION_ID = 'TITAN~paste-your-session-id-here'
    ```
-   *(The trailing `.` clones into the current directory.)*
-5. Click the **Startup** tab → set:
+   to your real session ID (from Step 2). Save the file.
+6. **Upload to the panel:** in the panel's **File Manager** tab, drag the file in. Rename it to `index.js` (replacing any existing one).
+7. **Startup tab** — make sure:
    - **Startup Command:** `node index.js`
    - **Main File:** `index.js`
-6. Click the **Variables** tab → add:
-   - `SESSION_ID` = `TITAN~...` (from Step 2)
-   - `OWNER_NUMBER` = `923001234567` (your WA number, no `+`)
-   - `SUDO` = `923001234567` (same number)
-   - *(optional)* `GEMINI_API_KEY`, `GROQ_API_KEY`, etc.
-7. Click the green **Start** button at the top of the console. You should see `Titan MD v1.0.0 — plugins: 183` within ~30 seconds.
-8. Proceed to Step 4.
+8. **Click the green Start button.** Watch the console — first run takes ~3 min (cloning + installing). You'll see:
+   - `[titan-md] cloning https://github.com/... into ./titan-md ...`
+   - `[titan-md] installing dependencies (npm install)...`
+   - `Titan MD v1.0.0 — plugins: 183` ← bot is alive
+9. Proceed to Step 4.
 
-**Other free Panel providers** *(use as backup if Bot-Hosting is down — instructions above work on any Pterodactyl panel)*:
+> 💡 **OWNER_NUMBER and SUDO env vars** — most panel egg templates also have a "Variables" tab where you can set environment variables. Add `OWNER_NUMBER=923001234567` and `SUDO=923001234567` there. The bootstrap will pick them up automatically.
+
+**Other free Panel providers** *(use as backup if Bot-Hosting is down — same flow: download bootstrap, edit SESSION_ID, upload as index.js)*:
 
 | Provider | URL | Notes |
 |---|---|---|
