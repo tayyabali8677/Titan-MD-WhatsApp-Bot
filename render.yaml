@@ -1,0 +1,31 @@
+# render.yaml — Render.com Blueprint for Titan MD
+#
+# When you click a "Deploy to Render" button or run a Blueprint deploy on
+# this repo, Render reads THIS file from the master branch and provisions
+# the services defined below.
+#
+# This blueprint provisions ONE service:
+#   • titan-md-session  — the SESSION_ID generator web UI (web/ dir)
+#
+# Why not the bot itself? Render's free tier doesn't include Background
+# Workers (which is what a WhatsApp user-bot needs). Deploy the bot
+# separately via Render's UI (New → Background Worker) on a paid plan,
+# OR use a different platform like Koyeb (free workers), Railway,
+# Heroku, or your own VPS — see README.md → Step 3.
+
+services:
+  - type: web
+    name: titan-md-session
+    runtime: node
+    plan: free
+    region: oregon
+    branch: master
+    buildCommand: npm install
+    startCommand: npm run web
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 10000
+    healthCheckPath: /healthz
+    autoDeploy: true
