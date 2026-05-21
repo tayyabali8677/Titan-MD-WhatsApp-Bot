@@ -17,13 +17,4 @@ bot({ pattern: 'cleartmp', desc: lang.plugins.cleartmp?.desc || 'Clear temp/cach
   return msg.reply('_🗑️ Temp files cleared ✅_\n_[mock] Cleared temporary media cache_');
 });
 
-bot({ pattern: 'update', desc: lang.plugins.update?.desc || 'Check for bot updates', type: 'system' }, async (msg) => {
-  const config = require('../config');
-  return msg.reply(
-    `*🔄 Update Check*\n\n📦 Current: v${config.VERSION}\n🌐 Latest: v${config.VERSION} (up to date)\n\n_Source: github.com/TitanDev/titan-md_`
-  );
-});
-
-bot({ pattern: 'updatenow', desc: lang.plugins.updatenow?.desc || 'Force update bot from GitHub', type: 'system' }, async (msg) => {
-  return msg.reply('_⬇️ Pulling latest updates..._\n_[mock] git pull origin master_\n_✅ Bot is up to date! Restart to apply._');
-});
+// .update and .updatenow are now implemented for real in plugins/update.js
