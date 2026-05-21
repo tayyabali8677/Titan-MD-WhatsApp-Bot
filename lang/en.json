@@ -1732,6 +1732,18 @@
         },
         "xvideo": {
             "desc": "NSFW video downloader (hidden from menu)"
+        },
+        "setreply": {
+            "desc": "Bind a keyword to an auto-reply in this chat"
+        },
+        "getreply": {
+            "desc": "List or look up auto-replies"
+        },
+        "delreply": {
+            "desc": "Delete an auto-reply by keyword"
+        },
+        "clearreply": {
+            "desc": "Delete all auto-replies in this chat"
         }
     }
 }
