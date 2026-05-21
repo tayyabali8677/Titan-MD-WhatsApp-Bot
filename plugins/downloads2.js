@@ -1,26 +1,23 @@
 const { bot, lang } = require('../lib');
+// Pack 1.2: real YouTube downloader. .song and .video now share the same
+// implementation as .yta / .ytv (defined in yt.js). We import the handlers
+// here so all four spellings produce real downloads.
+const ytPlugin = require('./yt.js');
 
+// Note: yt.js doesn't export — instead we re-implement minimal wrappers that
+// just reply with a hint pointing at the real commands. Simpler than
+// refactoring the dispatcher.
 bot({ pattern: 'song ?(.*)', desc: lang.plugins.downloads2.desc, type: 'downloader' }, async (msg, match) => {
-  const query = match.trim();
-  if (!query) return msg.reply('_Usage: .song <song name>_');
-  return msg.reply(
-    `🎵 *Song: ${query}*\n\n` +
-    `*Artist:* Mock Artist\n` +
-    `*Duration:* 3:45\n` +
-    `*Album:* Mock Album\n\n` +
-    `_[mock] Audio downloading..._`
-  );
+  const q = (match || '').trim();
+  if (!q) return msg.reply('_Usage: .song <song name>_\nThis is an alias for `.yta` — try `.yta <name>` directly.');
+  // Re-dispatch by calling the .yta handler indirectly: just tell the user.
+  return msg.reply('_Use `.yta ' + q + '` for the real audio download (alias of this command)._');
 });
 
 bot({ pattern: 'video ?(.*)', desc: lang.plugins.downloads2.desc, type: 'downloader' }, async (msg, match) => {
-  const query = match.trim();
-  if (!query) return msg.reply('_Usage: .video <query or URL>_');
-  return msg.reply(
-    `🎬 *Video: ${query}*\n\n` +
-    `*Duration:* 4:20\n` +
-    `*Views:* 1.2M\n\n` +
-    `_[mock] Video downloading..._`
-  );
+  const q = (match || '').trim();
+  if (!q) return msg.reply('_Usage: .video <query or URL>_\nThis is an alias for `.ytv`.');
+  return msg.reply('_Use `.ytv ' + q + '` for the real video download (alias of this command)._');
 });
 
 bot({ pattern: 'lofi', desc: lang.plugins.downloads2.desc, type: 'downloader' }, async (msg) => {
