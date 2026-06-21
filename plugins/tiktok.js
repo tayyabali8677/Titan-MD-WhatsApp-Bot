@@ -17,10 +17,13 @@ bot({ pattern: 'tiktok ?(.*)', desc: lang.plugins.tiktok.desc, type: 'downloader
   let filePath;
   try {
     await msg.reply('_Downloading TikTok video..._');
-    const info = await dl.tiktok(arg);
-    filePath = await dl.downloadToFile(info.videoUrl, 'mp4');
+    let info;
+    try { info = await dl.universalDl(arg); }
+    catch (_) { const t = await dl.tiktok(arg); info = { mediaUrl: t.videoUrl, kind: 'video', title: t.title, author: t.author }; }
+    const ext = info.kind === 'video' ? 'mp4' : 'jpg';
+    filePath = await dl.downloadToFile(info.mediaUrl, ext);
     const cap = `🎬 ${info.title || 'TikTok video'}\n👤 @${info.author || 'unknown'}`;
-    await dl.sendAndCleanup(msg, filePath, 'video', cap);
+    await dl.sendAndCleanup(msg, filePath, info.kind, cap);
   } catch (e) {
     if (filePath) dl.cleanup(filePath);
     return msg.reply('_TikTok download failed: ' + (e.message || e) + '_');

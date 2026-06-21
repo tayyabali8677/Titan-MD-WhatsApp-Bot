@@ -16,15 +16,22 @@ async function handler(msg, match) {
 
   try {
     await msg.reply('_Fetching tweet..._');
-    const items = await dl.twitter(arg);
+    let items;
+    try {
+      const info = await dl.universalDl(arg);
+      items = [info];
+    } catch (_) {
+      items = await dl.twitter(arg);
+    }
     if (!items.length) return msg.reply('_No media in this tweet — only text._');
 
     for (const it of items.slice(0, 4)) {
       let filePath;
       try {
+        const url = it.mediaUrl;
         const ext = it.kind === 'video' ? 'mp4' : 'jpg';
-        filePath = await dl.downloadToFile(it.mediaUrl, ext);
-        await dl.sendAndCleanup(msg, filePath, it.kind, `🐦 @${it.author}\n${it.title || ''}`);
+        filePath = await dl.downloadToFile(url, ext);
+        await dl.sendAndCleanup(msg, filePath, it.kind, `🐦 @${it.author || ''}\n${it.title || ''}`);
       } catch (e) {
         if (filePath) dl.cleanup(filePath);
       }
